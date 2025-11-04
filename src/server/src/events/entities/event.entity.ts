@@ -21,7 +21,7 @@ export class Event {
   family: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Child' })
-  child?: Types.ObjectId; // Vilket barn det gäller
+  child?: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;

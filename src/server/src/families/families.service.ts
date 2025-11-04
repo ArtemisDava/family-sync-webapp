@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -21,7 +22,6 @@ export class FamiliesService {
     createFamilyDto: CreateFamilyDto,
     userId: string,
   ): Promise<Family> {
-    // Skapa family och lägg till skaparen som medlem automatiskt
     const family = new this.familyModel({
       ...createFamilyDto,
       createdBy: userId,
@@ -40,14 +40,11 @@ export class FamiliesService {
   }
 
   async findAll(): Promise<Family[]> {
-    return (
-      this.familyModel
-        .find()
-        .populate('members', '-password') // Populera users utan lösenord
-        .populate('children')
-        // .populate('createdBy', '-password')
-        .exec()
-    );
+    return this.familyModel
+      .find()
+      .populate('members', '-password')
+      .populate('children')
+      .exec();
   }
 
   async findOne(id: string): Promise<Family> {
@@ -59,7 +56,6 @@ export class FamiliesService {
       .findById(id)
       .populate('members', '-password')
       .populate('children')
-      // .populate('createdBy', '-password')
       .exec();
 
     if (!family) {
@@ -87,8 +83,6 @@ export class FamiliesService {
 
     const family = await this.familyModel
       .findByIdAndUpdate(id, updateFamilyDto, { new: true })
-      // .populate('members', '-password')
-      // .populate('children')
       .exec();
 
     if (!family) {
@@ -123,14 +117,21 @@ export class FamiliesService {
     return family;
   }
 
-  async removeMember(familyId: string, userId: string): Promise<Family> {
+  async removeMember(
+    familyId: string,
+    userId: string,
+    role: string,
+  ): Promise<Family> {
     if (!Types.ObjectId.isValid(familyId) || !Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid ID');
     }
 
     const family = await this.familyModel
-      .findByIdAndUpdate(
-        familyId,
+      .findOneAndUpdate(
+        {
+          _id: familyId,
+          members: { $in: [new Types.ObjectId(userId)] },
+        },
         { $pull: { members: userId } },
         { new: true },
       )
@@ -148,9 +149,26 @@ export class FamiliesService {
     return family;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userRole: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid family ID');
+    }
+
+    const family = await this.familyModel
+      .findById(id)
+      .populate<{ members: UserDocument[] }>('members', '-password')
+      .exec();
+
+    if (!family) {
+      throw new NotFoundException('Family not found');
+    }
+
+    const isParent = family.members.find(
+      (member) => member._id.toString() === userId && member.role === 'parent',
+    );
+
+    if (userRole !== 'admin' && !isParent) {
+      throw new ForbiddenException('You can only delete your own account.');
     }
 
     const result = await this.familyModel.findByIdAndDelete(id).exec();

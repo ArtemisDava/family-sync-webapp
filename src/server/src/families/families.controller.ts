@@ -9,6 +9,7 @@ import {
   Param,
   Delete,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FamiliesService } from './families.service';
 import { CreateFamilyDto } from './dto/create-family.dto';
@@ -59,15 +60,21 @@ export class FamiliesController {
     return this.familiesService.addMember(id, addMemberDto.userId);
   }
 
-  @Delete(':id/members/:userId')
-  removeMember(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.familiesService.removeMember(id, userId);
+  @Delete(':id/members/:memberId')
+  @Roles('admin', 'parent')
+  removeMember(
+    @Param('id') familyId: string,
+    @Param('memberId') memberId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.familiesService.removeMember(familyId, memberId, req.userRole!);
   }
 
   // delete account only for admins and users themselves
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.familiesService.remove(id);
+  @Roles()
+  remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.familiesService.remove(id, req.userRole!, req.user.userId);
   }
 
   @Post('join/:code')

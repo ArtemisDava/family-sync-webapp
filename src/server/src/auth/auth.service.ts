@@ -41,5 +41,3 @@ export class AuthService {
     };
   }
 }
-
-//login email - password. NO username

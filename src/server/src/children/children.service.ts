@@ -18,17 +18,14 @@ export class ChildrenService {
   ) {}
 
   async create(createChildDto: CreateChildDto): Promise<Child> {
-    // Validera att family finns
     const family = await this.familyModel.findById(createChildDto.family);
     if (!family) {
       throw new NotFoundException('Family not found');
     }
 
-    // Skapa child
     const child = new this.childModel(createChildDto);
     await child.save();
 
-    // Lägg till child i family
     await this.familyModel.findByIdAndUpdate(createChildDto.family, {
       $addToSet: { children: child._id },
     });
@@ -52,7 +49,6 @@ export class ChildrenService {
     const child = await this.childModel
       .findById(id)
       .populate('family', 'name')
-      // .populate('guardians', 'name email -password')
       .populate('guardians', '-password')
       .exec();
 
@@ -69,7 +65,6 @@ export class ChildrenService {
     }
 
     if (updateChildDto.guardians?.length === 0) {
-      // Vad är bättre, ett fel eller att ta bort barnet?
       throw new BadRequestException('A child must have at least one guardian');
     }
 
@@ -96,12 +91,10 @@ export class ChildrenService {
       throw new NotFoundException('Child not found');
     }
 
-    // Ta bort från family
     await this.familyModel.findByIdAndUpdate(child.family, {
       $pull: { children: child._id },
     });
 
-    // Ta bort child
     await this.childModel.findByIdAndDelete(id);
   }
 

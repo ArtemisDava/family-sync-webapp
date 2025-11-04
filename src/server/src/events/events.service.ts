@@ -23,23 +23,19 @@ export class EventsService {
   ) {}
 
   async create(createEventDto: CreateEventDto, userId: string): Promise<Event> {
-    // check if userId is valid
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
 
-    // Check excistence of user
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Validate family
     if (!Types.ObjectId.isValid(createEventDto.family)) {
       throw new BadRequestException('Invalid family ID');
     }
 
-    // Check existence of family
     const family = await this.familyModel.findById(createEventDto.family);
     if (!family) {
       throw new NotFoundException('Family not found');
@@ -75,7 +71,6 @@ export class EventsService {
     return event;
   }
 
-  // Get events for a family
   async findByFamily(familyId: string, userId?: string): Promise<Event[]> {
     if (!Types.ObjectId.isValid(familyId)) {
       throw new BadRequestException('Invalid family ID');
@@ -83,7 +78,6 @@ export class EventsService {
 
     const query: any = { family: familyId };
 
-    // if userId is provided, only show shared events or user's private events
     if (userId) {
       query.$or = [
         { visibility: 'shared' },
@@ -106,7 +100,6 @@ export class EventsService {
       .exec();
   }
 
-  // Hämta events för en user
   async findByUser(userId: string): Promise<Event[]> {
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID');
@@ -126,7 +119,6 @@ export class EventsService {
     familyId?: string,
     userId?: string,
   ): Promise<Event[]> {
-    // validate dates
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -156,7 +148,6 @@ export class EventsService {
       if (!Types.ObjectId.isValid(userId)) {
         throw new BadRequestException('Invalid user ID');
       }
-      // Only include events the user created or that are shared with the user
       query.$or = [{ user: userId }, { sharedWith: userId }];
     }
 
@@ -194,7 +185,6 @@ export class EventsService {
       if (!family) {
         throw new NotFoundException('Family not found');
       }
-      // Check that the user is a member of the new family
       if (!family.members.includes(new Types.ObjectId(userId))) {
         throw new ForbiddenException(
           'User is not a member of the specified family',
@@ -212,7 +202,6 @@ export class EventsService {
         throw new NotFoundException('Child not found');
       }
 
-      // Ensure child belongs to the updated family (or existing if not updated)
       const targetFamilyId =
         updateEventDto.family || existingEvent.family.toString();
       if (child.family.toString() !== targetFamilyId) {

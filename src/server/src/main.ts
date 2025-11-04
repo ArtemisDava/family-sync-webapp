@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Enable CORS for client
   app.enableCors({
-    origin: 'http://localhost:5173', // Vite default port
+    origin: 'http://localhost:5173',
     credentials: true,
   });
 
@@ -19,7 +19,6 @@ async function bootstrap() {
     }),
   );
 
-  // Set global prefix for API routes
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 3000;

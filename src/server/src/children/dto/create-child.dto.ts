@@ -1,4 +1,3 @@
-// server/src/children/dto/create-child.dto.ts
 import {
   IsString,
   IsNotEmpty,

@@ -20,6 +20,6 @@ import { AuthCheckMiddleware } from '../auth-check/auth-check.middleware';
 })
 export class FamiliesModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthCheckMiddleware).forRoutes(FamiliesController); // Applicera på alla rutter i FamiliesController UTOM de exkluderade
+    consumer.apply(AuthCheckMiddleware).forRoutes(FamiliesController);
   }
 }

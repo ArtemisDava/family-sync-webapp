@@ -15,7 +15,6 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Kolla om email redan finns
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
     });
@@ -23,7 +22,6 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
-    // Hasha lösenord
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     const user = new this.userModel({

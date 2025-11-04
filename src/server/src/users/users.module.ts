@@ -22,10 +22,7 @@ export class UsersModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthCheckMiddleware)
-      .exclude(
-        { path: 'users', method: RequestMethod.POST }, // Tillåt registrering (Create)
-        // Lägg till fler rutter här om de ska vara tillgängliga för gäster
-      )
-      .forRoutes(UsersController); // Applicera på alla rutter i UsersController UTOM de exkluderade
+      .exclude({ path: 'users', method: RequestMethod.POST })
+      .forRoutes(UsersController);
   }
 }

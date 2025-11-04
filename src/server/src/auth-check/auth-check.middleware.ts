@@ -1,15 +1,14 @@
-// auth-check.middleware.ts
 import { Injectable, NestMiddleware, ForbiddenException } from '@nestjs/common';
-import { Request, Response } from 'express'; // Importera express-typerna
+import { Request, Response } from 'express';
 import { verify, JwtPayload } from 'jsonwebtoken';
 
-export const JWT_SECRET = 'YOUR_SUPER_SECRET_KEY'; // Hämta från ConfigService i prod
+export const JWT_SECRET = 'YOUR_SUPER_SECRET_KEY';
 
-// Utöka Request-interfacet för att inkludera 'user'
 export interface AuthenticatedRequest extends Request {
   user: JwtPayload & {
     userId: string;
   };
+  userRole?: string;
 }
 
 @Injectable()
@@ -18,7 +17,6 @@ export class AuthCheckMiddleware implements NestMiddleware {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // Ingen token. Behandla som gäst.
       return next();
     }
 
@@ -29,13 +27,10 @@ export class AuthCheckMiddleware implements NestMiddleware {
         userId: string;
       };
 
-      // Lägg till avkodad payload till request-objektet
       req.user = decoded;
 
       next();
     } catch (error) {
-      // Ogiltig token (utgången, fel signatur, etc.)
-      // Vi kastar ett undantag som Nest hanterar och returnerar 403 Forbidden.
       throw new ForbiddenException('Invalid or expired authentication token.');
     }
   }

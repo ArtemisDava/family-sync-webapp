@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ForbiddenException } from '@nestjs/common';
-import { type AuthenticatedRequest } from '../auth-check/auth-check.middleware'; // Importera den nya typen
+import { type AuthenticatedRequest } from '../auth-check/auth-check.middleware';
 
 @Controller('users')
 export class UsersController {

@@ -67,7 +67,7 @@ export class CreateEventDto {
   @IsArray()
   @IsNumber({}, { each: true })
   @IsOptional()
-  reminders?: number[]; // [60, 1440]
+  reminders?: number[];
 
   @IsString()
   @IsOptional()

@@ -29,24 +29,20 @@ export class ExpensesService {
     childrensIds?: string[],
     sharedWithIds?: string[],
   ): Promise<void> {
-    // Validate user
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID');
     }
 
-    // Check existence of user
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Check existence of family
     const family = await this.familyModel.findById(familyId);
     if (!family) {
       throw new NotFoundException('Family not found');
     }
 
-    // check that user is member of family
     const isMember = family.members.some(
       (memberId) => memberId.toString() === userId,
     );
@@ -54,7 +50,6 @@ export class ExpensesService {
       throw new ForbiddenException('User is not a member of the family');
     }
 
-    // check if childId is provided, if it is, validate it and check that child belongs to family
     if (childrensIds) {
       for (const childId of childrensIds) {
         const child = await this.childModel.findById(childId);

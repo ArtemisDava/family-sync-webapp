@@ -26,7 +26,6 @@ export class RolesGuard implements CanActivate {
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (!requiredRoles) return true;
 
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.userId;
@@ -36,8 +35,12 @@ export class RolesGuard implements CanActivate {
     const user = await this.userModel.findById(userId).lean();
     if (!user) throw new ForbiddenException('User not found');
 
-    const hasRole = requiredRoles.includes(user.role);
-    if (!hasRole) throw new ForbiddenException('Insufficient permissions');
+    if (requiredRoles?.length > 0) {
+      const hasRole = requiredRoles.includes(user.role);
+      if (!hasRole) throw new ForbiddenException('Insufficient permissions');
+    }
+
+    request.userRole = user.role;
 
     return true;
   }
