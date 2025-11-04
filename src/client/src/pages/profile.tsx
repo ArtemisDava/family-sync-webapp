@@ -99,7 +99,8 @@ export default function ProfilePage() {
                     "Are you sure you want to delete your account? This action cannot be undone."
                   );
                   if (confirmDelete) {
-                    await UserService.deleteUser();
+                    await UserService.deleteUser(user?.userId || "");
+                    window.location.href = "/";
                   }
                 }}
               >
