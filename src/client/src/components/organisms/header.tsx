@@ -4,7 +4,6 @@ import { menu } from "ionicons/icons";
 import { handleMenu } from "./menu";
 import { Link } from "react-router-dom";
 import Button from "@mui/material/Button";
-// import { useModal } from "../../contexts/modal.context";
 import { useUser } from "../../contexts/user.context";
 import { useNavigate } from "react-router-dom";
 
@@ -31,8 +30,6 @@ const useMediaQuery = (query: string) => {
 };
 
 export default function Header() {
-  //I'm prob going to remove modals completely, idk about the design yet
-  // const { invokeLoginModal } = useModal();
   const { user, logout } = useUser();
   let navigate = useNavigate();
 
