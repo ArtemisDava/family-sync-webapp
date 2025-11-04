@@ -195,4 +195,29 @@ export class FamiliesService {
     });
     return family;
   }
+
+  async removeChild(
+    familyId: string,
+    childId: string,
+    role: string,
+  ): Promise<Family> {
+    if (!Types.ObjectId.isValid(familyId) || !Types.ObjectId.isValid(childId)) {
+      throw new BadRequestException('Invalid ID');
+    }
+    const family = await this.familyModel
+      .findOneAndUpdate(
+        {
+          _id: familyId,
+          children: { $in: [new Types.ObjectId(childId)] },
+        },
+        { $pull: { children: childId } },
+        { new: true },
+      )
+      .populate('members', '-password')
+      .exec();
+    if (!family) {
+      throw new NotFoundException('Family not found');
+    }
+    return family;
+  }
 }

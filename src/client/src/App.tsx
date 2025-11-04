@@ -7,6 +7,7 @@ import SignupPage from "./pages/signup";
 import ProfilePage from "./pages/profile";
 import FamiliesPage from "./pages/families";
 import InvitePage from "./pages/invite";
+import ChildPage from "./pages/child";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/singup" element={<SignupPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/families/:id" element={<FamiliesPage />} />
+          <Route path="/families/:id/add-child" element={<ChildPage />} /> /
           <Route path="/invite/:code" element={<InvitePage />} />
         </Routes>
       </BrowserRouter>

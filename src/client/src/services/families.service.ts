@@ -78,4 +78,71 @@ export const FamiliesService = {
       throw error;
     }
   },
+
+  async deleteFamily(id: string, token?: string) {
+    try {
+      const response = await fetch(`${API_DOMAIN}/api/families/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete family");
+      }
+    } catch (error) {
+      console.error("Error deleting family:", error);
+      throw error;
+    }
+  },
+
+  async removeFamilyMember(familyId: string, memberId: string, token?: string) {
+    try {
+      const response = await fetch(
+        `${API_DOMAIN}/api/families/${familyId}/members/${memberId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to remove family member");
+      }
+    } catch (error) {
+      console.error("Error removing family member:", error);
+      throw error;
+    }
+  },
+
+  async removeChildFromFamily(
+    familyId: string,
+    childId: string,
+    token: string
+  ) {
+    try {
+      const response = await fetch(
+        `${API_DOMAIN}/api/families/${familyId}/remove-child/${childId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to remove child from family");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error removing child from family:", error);
+      throw error;
+    }
+  },
 };

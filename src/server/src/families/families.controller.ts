@@ -70,6 +70,16 @@ export class FamiliesController {
     return this.familiesService.removeMember(familyId, memberId, req.userRole!);
   }
 
+  @Delete(':familyId/remove-child/:childId')
+  @Roles('admin', 'parent')
+  removeChild(
+    @Param('familyId') familyId: string,
+    @Param('childId') childId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.familiesService.removeChild(familyId, childId, req.userRole!);
+  }
+
   // delete account only for admins and users themselves
   @Delete(':id')
   @Roles()
