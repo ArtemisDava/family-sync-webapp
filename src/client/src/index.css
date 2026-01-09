@@ -1,1 +1,240 @@
 @import "tailwindcss";
+
+.bg-logo {
+  background-image: url("/logo.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.fc-daygrid-dot-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.fc-daygrid-dot-event .fc-daygrid-event-dot {
+  display: none;
+}
+
+.fc-daygrid-dot-event .fc-event-title {
+  color: white;
+  font-weight: 500;
+}
+
+.fc .fc-button {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fc .fc-button:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+.fc .fc-button:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.fc-list {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.fc-list-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.fc-list-day th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  padding: 12px 16px;
+  border: none;
+}
+
+.fc-list-day-cushion {
+  background: transparent !important;
+  padding: 12px 16px !important;
+}
+
+.fc-list-day-text,
+.fc-list-day-side-text {
+  color: black;
+  font-weight: 600;
+}
+
+.fc-list-event {
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.fc-list-event:hover {
+  background-color: #f0f4ff;
+  transform: translateX(4px);
+}
+
+.fc-list-event td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.fc .fc-list-event-graphic,
+.fc .fc-list-event-time {
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
+  width: 120px;
+}
+
+.fc-list-event-dot {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.fc-list-event-title {
+  font-weight: 500;
+  color: #1f2937;
+  position: relative;
+}
+
+.fc-list-event-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fc-list-event-title a:hover {
+  color: #3b82f6;
+}
+
+.fc-list-day + .fc-list-event,
+.fc-list-event + .fc-list-event {
+  border-top: none;
+}
+
+.fc-list-table tbody {
+  display: block;
+}
+
+.fc-list-day {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.fc-list-event {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.fc-list-event-graphic {
+  width: 40px;
+  text-align: center;
+}
+
+/* Empty state */
+.fc-list-empty {
+  background-color: #f9fafb;
+  padding: 48px;
+  text-align: center;
+}
+
+.fc-list-empty-cushion {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.fc-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fc-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.fc-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.fc-list::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+@media (max-width: 768px) {
+  .fc-list-event-time {
+    min-width: 80px;
+    font-size: 0.875rem;
+  }
+
+  .fc-list-event td {
+    padding: 8px 12px;
+  }
+}
+.fc-list-event {
+  margin: 4px 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--fc-event-border-color, #3b82f6);
+  background: white;
+}
+
+.fc-list-event:nth-child(even) {
+  background: #fefefe;
+}
+
+.fc-list-event {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fc-list-day-cushion::after {
+  content: "";
+  display: inline-block;
+}
+
+.fc-list-event-time {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 6px;
+  padding: 4px 8px !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-right: 8px;
+}
