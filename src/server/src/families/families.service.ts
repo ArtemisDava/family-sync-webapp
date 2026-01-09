@@ -10,10 +10,12 @@ import { Family, FamilyDocument } from './entities/family.entity';
 import { User, UserDocument } from '../users/entities/user.entity';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { UpdateFamilyDto } from './dto/update-family.dto';
+import { Child, ChildDocument } from '../children/entities/child.entity';
 
 @Injectable()
 export class FamiliesService {
   constructor(
+    @InjectModel(Child.name) private childModel: Model<ChildDocument>,
     @InjectModel(Family.name) private familyModel: Model<FamilyDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
@@ -215,9 +217,16 @@ export class FamiliesService {
       )
       .populate('members', '-password')
       .exec();
+
+    await this.childModel.findByIdAndDelete(childId);
+
     if (!family) {
       throw new NotFoundException('Family not found');
     }
     return family;
+  }
+
+  async getTotalFamiliesCount(): Promise<number> {
+    return this.familyModel.countDocuments().exec();
   }
 }

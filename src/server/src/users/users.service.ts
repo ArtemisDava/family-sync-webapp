@@ -73,4 +73,12 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
   }
+
+  async getUserCount(): Promise<number> {
+    return this.userModel.countDocuments().exec();
+  }
+
+  async getAdminCount(): Promise<number> {
+    return this.userModel.countDocuments({ isAdmin: true }).exec();
+  }
 }
