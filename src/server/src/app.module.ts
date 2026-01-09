@@ -12,6 +12,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ChildrenModule } from './children/children.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
+import { ConnectionLogsModule } from './connection_logs/connection_logs.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AdminModule } from './admin/admin.module';
     ChildrenModule,
     AuthModule,
     AdminModule,
+    ConnectionLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
