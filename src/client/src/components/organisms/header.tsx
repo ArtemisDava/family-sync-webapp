@@ -97,6 +97,30 @@ export default function Header() {
             )}
             {user && (
               <>
+                {user.role === "admin" && (
+                  <li className="mx-4 my-6 md:my-0">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      color="inherit"
+                      className="mx-4"
+                      onClick={() => navigate("/admin/preview")}
+                    >
+                      Admin Panel
+                    </Button>
+                  </li>
+                )}
+                <li className="mx-4 my-6 md:my-0">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="inherit"
+                    className="mx-4"
+                    onClick={() => navigate("/schedules")}
+                  >
+                    Schedules
+                  </Button>
+                </li>
                 <li className="mx-4 my-6 md:my-0">
                   <Button
                     variant="contained"
@@ -109,7 +133,13 @@ export default function Header() {
                   </Button>
                 </li>
                 <li className="mx-4 my-6 md:my-0">
-                  <Button variant="contained" onClick={() => logout()}>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                    }}
+                  >
                     Logout
                   </Button>
                 </li>
