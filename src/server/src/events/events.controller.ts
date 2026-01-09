@@ -12,6 +12,8 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { DateRangeQueryDto } from './dto/date-range-query.dto';
+import { Req } from '@nestjs/common/decorators';
+import { type AuthenticatedRequest } from '../auth-check/auth-check.middleware';
 
 @Controller('events')
 export class EventsController {
@@ -38,6 +40,21 @@ export class EventsController {
   @Get('child/:childId')
   findByChild(@Param('childId') childId: string) {
     return this.eventsService.findByChild(childId);
+  }
+
+  @Post('child/:childId')
+  createForChild(
+    @Param('childId') childId: string,
+    @Body() createEventDto: CreateEventDto,
+    @Req() { user }: AuthenticatedRequest,
+  ) {
+    console.log('Creating event for child:', childId, 'by user:', user.userId);
+    console.log('Event data:', createEventDto);
+    return this.eventsService.createForChild(
+      childId,
+      createEventDto,
+      user.userId,
+    );
   }
 
   @Get('user/:userId')
@@ -71,7 +88,7 @@ export class EventsController {
 
   //FIX ''"message": "You can only delete your own events",''
   @Delete(':id')
-  remove(@Param('id') id: string, @Query('userId') userId: string) {
-    return this.eventsService.remove(id, userId);
+  remove(@Param('id') id: string, @Req() { user }: AuthenticatedRequest) {
+    return this.eventsService.remove(id, user.userId);
   }
 }

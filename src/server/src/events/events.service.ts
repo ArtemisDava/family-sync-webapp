@@ -234,4 +234,35 @@ export class EventsService {
 
     await this.eventModel.findByIdAndDelete(id);
   }
+
+  async createForChild(
+    childId: string,
+    createEventDto: CreateEventDto,
+    userId: string,
+  ): Promise<Event> {
+    if (!Types.ObjectId.isValid(childId)) {
+      throw new BadRequestException('Invalid child ID');
+    }
+
+    const child = await this.childModel
+      .findById(childId)
+      .populate<{ family: FamilyDocument }>('family')
+      .exec();
+    if (!child) {
+      throw new NotFoundException('Child not found');
+    }
+    const hasUserIdInFamily = child.family.members.some(
+      (member) => member._id.toString() === userId,
+    );
+
+    if (!hasUserIdInFamily) {
+      throw new ForbiddenException(
+        'User is not a member of the family associated with the child',
+      );
+    }
+
+    createEventDto.child = childId;
+    createEventDto.family = String(child.family._id);
+    return this.create(createEventDto, userId);
+  }
 }
