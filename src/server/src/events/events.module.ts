@@ -6,6 +6,9 @@ import { Event, EventSchema } from './entities/event.entity';
 import { Family, FamilySchema } from '../families/entities/family.entity';
 import { Child, ChildSchema } from '../children/entities/child.entity';
 import { User, UserSchema } from '../users/entities/user.entity';
+import { MiddlewareConsumer } from '@nestjs/common/interfaces/middleware/middleware-consumer.interface';
+import { AuthCheckMiddleware } from '../auth-check/auth-check.middleware';
+import { FamiliesController } from '../families/families.controller';
 
 @Module({
   imports: [
@@ -20,4 +23,8 @@ import { User, UserSchema } from '../users/entities/user.entity';
   providers: [EventsService],
   exports: [EventsService],
 })
-export class EventsModule {}
+export class EventsModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthCheckMiddleware).forRoutes(EventsController);
+  }
+}
