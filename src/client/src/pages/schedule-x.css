@@ -1,0 +1,55 @@
+/* Custom styles for Schedule-X calendar */
+.sx-react-calendar-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.sx-react-calendar-wrapper .sx-react-calendar {
+  height: 600px;
+  min-height: 500px;
+}
+
+.sx-react-calendar-wrapper .sx__calendar-wrapper {
+  height: 100%;
+}
+
+.sx-react-calendar-wrapper .sx__event {
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.sx-react-calendar-wrapper .sx__month-grid-day {
+  min-height: 100px;
+}
+
+.sx-react-calendar-wrapper .sx__week-grid {
+  min-height: 500px;
+}
+
+.sx-react-calendar-wrapper .sx__day-grid {
+  min-height: 500px;
+}
+
+.sx-react-calendar-wrapper .sx__calendar-header {
+  padding: 0.5rem 1rem;
+}
+
+.sx-react-calendar-wrapper .sx__calendar-header button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.sx-react-calendar-wrapper .sx__calendar-header button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sx-react-calendar-wrapper .sx__view-selection button {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.sx-react-calendar-wrapper .sx__event-modal {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
