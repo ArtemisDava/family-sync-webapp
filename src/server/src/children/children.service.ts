@@ -98,6 +98,18 @@ export class ChildrenService {
     await this.childModel.findByIdAndDelete(id);
   }
 
+  async findByUser(userId: string): Promise<Child[]> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    return this.childModel
+      .find({ guardians: userId })
+      .populate('family', 'name')
+      .populate('guardians', '-password')
+      .exec();
+  }
+
   //  nice to have Beräkna ålder
   // async getAge(id: string): Promise<number> {
   //   const child = await this.findOne(id);

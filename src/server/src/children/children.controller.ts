@@ -6,12 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ChildrenService } from './children.service';
 import { CreateChildDto } from './dto/create-child.dto';
 import { UpdateChildDto } from './dto/update-child.dto';
+import { Req } from '@nestjs/common/decorators';
+import { type AuthenticatedRequest } from '../auth-check/auth-check.middleware';
+import { Roles, RolesGuard } from '../auth/role.guard';
 
 @Controller('children')
+@UseGuards(RolesGuard)
 export class ChildrenController {
   constructor(private readonly childrenService: ChildrenService) {}
 
@@ -53,4 +58,17 @@ export class ChildrenController {
   // findByFamily(@Param('familyId') familyId: string) {
   //   return this.childrenService.findByFamily(familyId);
   // }
+
+  @Get('user/:userId')
+  @Roles()
+  findByUser(
+    @Param('userId') userId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (req.user.userId !== userId && req.user.role !== 'admin') {
+      throw new Error('Access denied');
+    }
+
+    return this.childrenService.findByUser(userId);
+  }
 }
