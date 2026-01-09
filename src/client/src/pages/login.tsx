@@ -6,6 +6,8 @@ import { useUser } from "../contexts/user.context";
 import { type LoginDto } from "../models/login.dto";
 import type LoginInformation from "../models/loginInformation";
 import { Link } from "react-router-dom";
+import { IonIcon } from "@ionic/react";
+import { arrowBack } from "ionicons/icons";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -42,53 +44,69 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="">
-      <form className="" onSubmit={handleSubmit}>
-        <div className="">
-          <label className="">
-            Email
+    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container">
+      <div className="mb-6 bg-logo lg:w-1/2 min-h-[86vh] flex items-center justify-center">
+        <h1 className="text-3xl font-bold">Family Sync!</h1>
+      </div>
+      <div className="lg:w-1/2 p-6">
+        <button
+          className="flex items-center gap-2 mb-12 cursor-pointer opcacity-75 hover:opacity-100"
+          onClick={() => navigate(-1)}
+        >
+          <IonIcon icon={arrowBack} className="p-2 text-" />
+          <span className="text-md font-medium cursor-pointer">Back</span>
+        </button>
+        <h1 className="text-2xl font-bold mb-4">Welcome back!</h1>
+
+        <form className="my-20" onSubmit={handleSubmit}>
+          <div className="flex flex-col gap-4 mb-4">
+            <label className="" htmlFor="email">
+              Email
+            </label>
             <input
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className=""
               required
+              className="border border-black/50 rounded-md p-2"
+              name="email"
             />
-          </label>
-          <label className="">
-            Password
+            <label className="" htmlFor="password">
+              Password
+            </label>
             <input
               type="password"
               value={password}
+              name="password"
               onChange={(e) => setPassword(e.target.value)}
-              className=""
+              className="border border-black/50 rounded-md p-2"
               required
             />
-          </label>
-        </div>
-        {error && <div className="">{error}</div>}
-        <div className="">
-          <Button
-            variant="contained"
-            size="small"
-            color="inherit"
-            type="submit"
-          >
-            Sign in
-          </Button>
-        </div>
-        <div className="">
-          <div className=""></div>
-          <span className="">or</span>
-          <div className=""></div>
-        </div>
-        <div className="">
-          <span>Don't have an account yet?</span>
-          <Link to={"/singup"} className="">
-            Sign up
-          </Link>
-        </div>
-      </form>
+          </div>
+          {error && <div className="">{error}</div>}
+          <div className="">
+            <Button
+              variant="contained"
+              size="small"
+              color="secondary"
+              type="submit"
+              fullWidth={true}
+              sx={{ px: 4, py: 1 }}
+            >
+              Login
+            </Button>
+          </div>
+          <div className="w-full flex flex-col items-center gap-2 mt-4">
+            <p>Don't have an account yet?</p>
+            <Link
+              to={"/singup"}
+              className="w-full border border-black/50 mx-auto text-center rounded-md p-2"
+            >
+              Sign up
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
