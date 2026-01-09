@@ -18,19 +18,11 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<LoginInformation | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
-  );
+  const storedUser = UserService.getUser();
+  const storedToken = localStorage.getItem("token");
 
-  useEffect(() => {
-    const storedUser = UserService.getUser();
-    const storedToken = localStorage.getItem("token");
-    if (storedUser) {
-      setUser(storedUser);
-      setToken(storedToken);
-    }
-  }, []);
+  const [user, setUser] = useState<LoginInformation | null>(storedUser);
+  const [token, setToken] = useState<string | null>(storedToken);
 
   const login = (userData: LoginInformation, token: string) => {
     localStorage.setItem("token", token);
@@ -43,7 +35,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     UserService.logout();
     setUser(null);
     setToken(null);
-    window.location.replace("/");
   };
 
   const contextValue: UserContextType = {
