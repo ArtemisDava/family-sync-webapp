@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@schedule-x/calendar-controls": "^3.6.0"
+  }
+}
