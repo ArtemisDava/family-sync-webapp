@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { Roles, RolesGuard } from '../auth/role.guard';
+import { UseGuards } from '@nestjs/common';
 
 @Controller('admin')
+@UseGuards(RolesGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -30,5 +41,11 @@ export class AdminController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.adminService.remove(+id);
+  }
+
+  @Get('stats/overview')
+  @Roles('admin')
+  getOverviewStats() {
+    return this.adminService.getOverviewStats();
   }
 }

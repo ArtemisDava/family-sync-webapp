@@ -3,4 +3,5 @@ export default interface LoginInformation {
   userId: string;
   name: string;
   email: string;
+  role: string;
 }
