@@ -3,4 +3,5 @@ export default class LoginResponse {
   userId: string;
   email: string;
   name: string;
+  role: string;
 }
