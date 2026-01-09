@@ -7,15 +7,20 @@ import { JwtPayload, sign } from 'jsonwebtoken';
 import { JWT_SECRET } from '../auth-check/auth-check.middleware';
 import { User } from '../users/entities/user.entity';
 import LoginResponse from './dto/loginResponse.dto';
+import { ConnectionLogsService } from '../connection_logs/connection_logs.service';
+import { type Request } from 'express';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly ConnectionLogsService: ConnectionLogsService,
+  ) {}
 
   signUp(value: CreateUserDto): Promise<User> {
     return this.usersService.create(value);
   }
-  async login(loginDTO: LoginDTO): Promise<LoginResponse> {
+  async login(loginDTO: LoginDTO, req: Request): Promise<LoginResponse> {
     let user = await this.usersService.findByEmail(loginDTO.email);
 
     const isPasswordValid = user
@@ -33,11 +38,16 @@ export class AuthService {
 
     const jwt = sign(payload, JWT_SECRET);
 
+    const ip = req.ip || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    await this.ConnectionLogsService.create(user._id, ip, userAgent.toString());
+
     return {
       accessToken: jwt,
       email: user.email,
       name: user.name,
       userId: user._id!.toString(),
+      role: user.isAdmin ? 'admin' : user.role,
     };
   }
 }
