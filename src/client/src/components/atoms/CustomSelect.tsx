@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-interface Option {
+export interface Option {
   value: string;
   label: string;
   color?: string;
@@ -25,7 +25,7 @@ export function CustomSelect({
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Option | null>(
-    value ? options.find((o) => o.value === value) || null : null
+    value ? options.find((o) => o.value === value) || null : null,
   );
   const containerRef = useRef<HTMLDivElement>(null);
 
