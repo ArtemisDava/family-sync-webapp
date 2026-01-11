@@ -16,6 +16,12 @@ export class User {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ type: Date, required: true })
+  birthDate: Date;
+
+  @Prop({ required: true })
+  color: string;
+
   @Prop()
   phoneNumber?: string;
 
