@@ -3,12 +3,14 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { UsersService } from '../users/users.service';
 import { FamiliesService } from '../families/families.service';
+import { ConnectionLogsService } from 'src/connection_logs/connection_logs.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly usersService: UsersService,
     private readonly familiesService: FamiliesService,
+    private readonly connectionLogsService: ConnectionLogsService,
   ) {}
 
   create(createAdminDto: CreateAdminDto) {
@@ -32,15 +34,19 @@ export class AdminService {
   }
 
   async getOverviewStats() {
-    let totalUsers = await this.usersService.getUserCount();
-    let totalFamilies = await this.familiesService.getTotalFamiliesCount();
-    let totalAdmins = await this.usersService.getAdminCount();
+    const totalUsers = await this.usersService.getUserCount();
+    const totalFamilies = await this.familiesService.getTotalFamiliesCount();
+    const totalAdmins = await this.usersService.getAdminCount();
+    const totalFrequency = await this.connectionLogsService.getTotalConnectionsByMonth();
 
     return {
       totalUsers: totalUsers,
       totalFamilies: totalFamilies,
       totalAdmins: totalAdmins,
-      totalFrequency: 0,
+      totalFrequency: {
+        data: totalFrequency,
+        total: totalFrequency.reduce((acc, curr) => acc + curr.totalConnections, 0),
+      },
     };
   }
 }
