@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { UserService } from "../services/user.service.ts";
 import type LoginInformation from "../models/loginInformation.tsx";
 
