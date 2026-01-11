@@ -57,7 +57,12 @@ export const UserService = {
       if (!result.ok) {
         throw new Error("Failed to update user");
       }
-      return result.json();
+      const userResponse = await result.json();
+      userResponse.userId = userResponse._id;
+
+      localStorage.setItem("user", JSON.stringify(userResponse));
+
+      return userResponse;
     } catch (error) {
       console.error("Error updating user:", error);
       throw error;
