@@ -48,13 +48,32 @@ export class EventsController {
     @Body() createEventDto: CreateEventDto,
     @Req() { user }: AuthenticatedRequest,
   ) {
-    console.log('Creating event for child:', childId, 'by user:', user.userId);
-    console.log('Event data:', createEventDto);
     return this.eventsService.createForChild(
       childId,
       createEventDto,
       user.userId,
     );
+  }
+
+  @Post('adult/:familyId')
+  createForAdult(
+    @Param('familyId') familyId: string,
+    @Body() createEventDto: CreateEventDto,
+    @Req() { user }: AuthenticatedRequest,
+  ) {
+    return this.eventsService.createForAdult(
+      familyId,
+      createEventDto,
+      user.userId,
+    );
+  }
+
+  @Get('adult/:familyId')
+  findByAdult(
+    @Param('familyId') familyId: string,
+    @Query('userId') userId: string,
+  ) {
+    return this.eventsService.findByAdult(familyId, userId);
   }
 
   @Get('user/:userId')
@@ -81,9 +100,9 @@ export class EventsController {
   update(
     @Param('id') id: string,
     @Body() updateEventDto: UpdateEventDto,
-    @Query('userId') userId: string, // Temporärt
+    @Req() req: AuthenticatedRequest, // Temporärt
   ) {
-    return this.eventsService.update(id, updateEventDto, userId);
+    return this.eventsService.update(id, updateEventDto, req.user.userId);
   }
 
   //FIX ''"message": "You can only delete your own events",''

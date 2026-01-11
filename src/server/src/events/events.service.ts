@@ -265,4 +265,48 @@ export class EventsService {
     createEventDto.family = String(child.family._id);
     return this.create(createEventDto, userId);
   }
+
+  async createForAdult(
+    familyId: string,
+    createEventDto: CreateEventDto,
+    userId: string,
+  ): Promise<Event> {
+    const adult = await this.userModel
+      .findById(userId)
+      .populate<{ families: FamilyDocument[] }>('families')
+      .exec();
+
+    if (!adult) {
+      throw new NotFoundException('Adult not found');
+    }
+
+    createEventDto.adult = userId;
+    createEventDto.family = familyId;
+
+    return this.create(createEventDto, userId);
+  }
+
+  async findByAdult(familyId: string, userId: string): Promise<Event[]> {
+    if (!Types.ObjectId.isValid(familyId)) {
+      throw new BadRequestException('Invalid family ID');
+    }
+
+    const query: {
+      family: string;
+      $or: (
+        | { visibility: string }
+        | { createdBy: string }
+        | { sharedWith: string }
+      )[];
+    } = { family: familyId, $or: [] };
+
+    if (userId) {
+      query.$or = [
+        { visibility: 'shared' },
+        { createdBy: userId },
+        { sharedWith: userId },
+      ];
+    }
+    return this.eventModel.find(query).sort({ startDate: 1 }).exec();
+  }
 }
