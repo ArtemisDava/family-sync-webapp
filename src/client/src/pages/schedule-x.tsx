@@ -15,12 +15,111 @@ import "@schedule-x/theme-default/dist/index.css";
 import "./schedule-x.css";
 import { createCalendarControlsPlugin } from "@schedule-x/calendar-controls";
 import { createCurrentTimePlugin } from "@schedule-x/current-time";
+import Skeleton from "@mui/material/Skeleton";
 
 import { useModal } from "../contexts/modal.context";
 import { useScheduleData } from "../hooks/useScheduleData";
 import { FamilyScheduleList } from "../components/organisms/FamilyScheduleList";
 import { ScheduleXEventModal } from "../components/organisms/ScheduleXEventModal";
 import { transformToCalendarEvents } from "../utils/event.utils";
+import { EventsService } from "../services/events.service";
+import { useUser } from "../contexts/user.context";
+
+function SchedulePageSkeleton() {
+  const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  const weeks = Array(5).fill(null);
+
+  return (
+    <section className="p-4 lg:px-20 container mx-auto flex flex-wrap flex-col-reverse md:flex-row gap-8 w-full">
+      <div className="flex-1" style={{ minHeight: 500 }}>
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Skeleton variant="rounded" width={70} height={36} />
+              <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="text" width={150} height={32} />
+            </div>
+            <div className="flex items-center gap-4">
+              <Skeleton variant="rounded" width={100} height={36} />
+              <Skeleton variant="rounded" width={140} height={36} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 border-b pb-2 mb-2">
+            {days.map((day) => (
+              <div key={day} className="text-center">
+                <Skeleton
+                  variant="text"
+                  width={30}
+                  height={20}
+                  className="mx-auto"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-px bg-gray-200">
+            {weeks.map((_, weekIndex) =>
+              days.map((_, dayIndex) => (
+                <div
+                  key={`${weekIndex}-${dayIndex}`}
+                  className="bg-white min-h-20 p-2"
+                >
+                  <Skeleton variant="text" width={20} height={20} />
+                  {/* Random event skeletons */}
+                  {Math.random() > 0.7 && (
+                    <Skeleton
+                      variant="rounded"
+                      width="100%"
+                      height={24}
+                      className="mt-1"
+                      sx={{ bgcolor: "rgba(59, 130, 246, 0.2)" }}
+                    />
+                  )}
+                </div>
+              )),
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="min-w-[170px]">
+        <div className="md:fixed">
+          <Skeleton
+            variant="rounded"
+            width={140}
+            height={40}
+            className="mb-4"
+            sx={{ bgcolor: "rgba(59, 130, 246, 0.3)" }}
+          />
+
+          <Skeleton variant="text" width={140} height={28} className="mb-3" />
+
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="mb-3 p-3 bg-white rounded-lg shadow-sm border"
+            >
+              <Skeleton
+                variant="text"
+                width={100}
+                height={24}
+                className="mb-2"
+              />
+              {i === 1 && (
+                <div className="flex items-center gap-2 ml-2">
+                  <Skeleton variant="circular" width={12} height={12} />
+                  <Skeleton variant="text" width={70} height={20} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 interface ScheduleXEvent {
   id: string;
@@ -34,9 +133,7 @@ interface ScheduleXEvent {
 
 function toScheduleXFormat(
   events: ReturnType<typeof transformToCalendarEvents>,
-  childToCalendarId: Record<string, string> = {}
 ): ScheduleXEvent[] {
-  console.log("Transforming events for ScheduleX:", events);
   return events.map((event, index) => {
     const calendarId = event.childId;
 
@@ -65,7 +162,7 @@ function formatDateForScheduleX(date: Date): Temporal.ZonedDateTime {
 }
 
 function generateCalendarsConfigWithColorMap(
-  events: ReturnType<typeof transformToCalendarEvents>
+  events: ReturnType<typeof transformToCalendarEvents>,
 ): {
   calendars: Record<
     string,
@@ -127,7 +224,6 @@ function generateCalendarsConfigWithColorMap(
     };
   });
 
-  console.log("Generated calendars config:", calendars);
   return { calendars, childToCalendarId };
 }
 
@@ -135,9 +231,10 @@ export default function ScheduleXPage() {
   const { families, familiesMap, children, eventsByChild, loading, refetch } =
     useScheduleData();
   const { invokeCreateEventModal } = useModal();
+  const { token, user } = useUser();
 
   const [disabledChildren, setDisabledChildren] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const familiesRef = useRef<typeof families>(families);
@@ -149,17 +246,20 @@ export default function ScheduleXPage() {
     childrenRef.current = children;
   }, [children]);
 
-  const toggleChildCalendar = useCallback((childId: string) => {
-    setDisabledChildren((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(childId)) {
-        newSet.delete(childId);
-      } else {
-        newSet.add(childId);
-      }
-      return newSet;
-    });
-  }, []);
+  const toggleChildCalendar = useCallback(
+    (childId: string, familyId?: string) => {
+      setDisabledChildren((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(childId + "-" + (familyId || ""))) {
+          newSet.delete(childId + "-" + (familyId || ""));
+        } else {
+          newSet.add(childId + "-" + (familyId || ""));
+        }
+        return newSet;
+      });
+    },
+    [],
+  );
 
   const handleCreateEvent = useCallback(() => {
     if (!families || families.length === 0) {
@@ -172,30 +272,33 @@ export default function ScheduleXPage() {
       family: { _id: child.family },
       color: child.color,
     }));
-    console.log(
-      "Opening create event modal with children:",
-      transformedChildren
-    );
     invokeCreateEventModal({
       families,
       children: transformedChildren,
       onEventCreated: refetch,
+      user,
     });
-  }, [families, children, invokeCreateEventModal, refetch]);
+  }, [families, children, invokeCreateEventModal, refetch, user]);
 
   const filteredEvents = useMemo(
-    () => transformToCalendarEvents(eventsByChild, children, disabledChildren),
-    [eventsByChild, children, disabledChildren]
+    () =>
+      transformToCalendarEvents(
+        eventsByChild,
+        children,
+        disabledChildren,
+        user,
+      ),
+    [eventsByChild, children, disabledChildren, user],
   );
 
   const { calendars, childToCalendarId } = useMemo(
     () => generateCalendarsConfigWithColorMap(filteredEvents),
-    [filteredEvents]
+    [filteredEvents],
   );
 
   const scheduleXEvents = useMemo(
     () => toScheduleXFormat(filteredEvents, childToCalendarId),
-    [filteredEvents, childToCalendarId]
+    [filteredEvents, childToCalendarId],
   );
 
   const eventsServicePlugin = useMemo(() => createEventsServicePlugin(), []);
@@ -207,11 +310,11 @@ export default function ScheduleXPage() {
   const dragAndDropPlugin = useMemo(() => createDragAndDropPlugin(), []);
   const currentTimePlugin = useMemo(
     () => createCurrentTimePlugin({ fullWeekWidth: true }),
-    []
+    [],
   );
 
   const onDoubleClickDate = useCallback(
-    (date: any) => {
+    (date: { year: number; month: number; day: number }) => {
       const fams = familiesRef.current;
       const kids = childrenRef.current;
       if (!fams || fams.length === 0) return;
@@ -227,18 +330,16 @@ export default function ScheduleXPage() {
         start: dateObj,
         end: dateObj,
         onEventCreated: refetch,
+        user,
       });
     },
-    [invokeCreateEventModal, refetch]
+    [invokeCreateEventModal, refetch, user],
   );
 
   const onClickDate = useCallback(
-    (date: any) => {
+    (date: { year: number; month: number; day: number }) => {
       const fams = familiesRef.current;
       const kids = childrenRef.current;
-      console.log("Date clicked:", date);
-      console.log("Opening create event modal for clicked date.");
-      console.log("Families available:", fams);
       if (!fams || fams.length === 0) return;
       const dateObj = new Date(date.year, date.month - 1, date.day);
       invokeCreateEventModal({
@@ -252,9 +353,49 @@ export default function ScheduleXPage() {
         start: dateObj,
         end: dateObj,
         onEventCreated: refetch,
+        user,
       });
     },
-    [invokeCreateEventModal, refetch]
+    [invokeCreateEventModal, refetch, user],
+  );
+
+  const onEventUpdate = useCallback(
+    async (updatedEvent: ScheduleXEvent) => {
+      try {
+        const eventId = updatedEvent.id;
+
+        const startDate = new Date(
+          updatedEvent.start.year,
+          updatedEvent.start.month - 1,
+          updatedEvent.start.day,
+          updatedEvent.start.hour,
+          updatedEvent.start.minute,
+          updatedEvent.start.second,
+        ).toISOString();
+
+        const endDate = new Date(
+          updatedEvent.end.year,
+          updatedEvent.end.month - 1,
+          updatedEvent.end.day,
+          updatedEvent.end.hour,
+          updatedEvent.end.minute,
+          updatedEvent.end.second,
+        ).toISOString();
+
+        await EventsService.updateEvent(
+          eventId,
+          {
+            startDate,
+            endDate,
+          },
+          token,
+        );
+      } catch (error) {
+        console.error("Error updating event:", error);
+        refetch();
+      }
+    },
+    [token, refetch],
   );
 
   const calendar = useCalendarApp({
@@ -272,87 +413,6 @@ export default function ScheduleXPage() {
         List: "Agenda",
       },
     },
-    // calendars: calendars,
-    // calendars: {
-    //   personal: {
-    //     colorName: "personal",
-    //     lightColors: {
-    //       main: "#f9d71c",
-    //       container: "#fff5aa",
-    //       onContainer: "#594800",
-    //     },
-    //     darkColors: {
-    //       main: "#fff5c0",
-    //       onContainer: "#fff5de",
-    //       container: "#a29742",
-    //     },
-    //   },
-    //   work: {
-    //     colorName: "work",
-    //     lightColors: {
-    //       main: "#f91c45",
-    //       container: "#ffd2dc",
-    //       onContainer: "#59000d",
-    //     },
-    //     darkColors: {
-    //       main: "#ffc0cc",
-    //       onContainer: "#ffdee6",
-    //       container: "#a24258",
-    //     },
-    //   },
-    //   leisure: {
-    //     colorName: "leisure",
-    //     lightColors: {
-    //       main: "#1cf9b0",
-    //       container: "#dafff0",
-    //       onContainer: "#004d3d",
-    //     },
-    //     darkColors: {
-    //       main: "#c0fff5",
-    //       onContainer: "#e6fff5",
-    //       container: "#42a297",
-    //     },
-    //   },
-    //   school: {
-    //     colorName: "school",
-    //     lightColors: {
-    //       main: "#1c7df9",
-    //       container: "#d2e7ff",
-    //       onContainer: "#002859",
-    //     },
-    //     darkColors: {
-    //       main: "#c0dfff",
-    //       onContainer: "#dee6ff",
-    //       container: "#426aa2",
-    //     },
-    //   },
-    // },
-    // events: [
-    //   // ... other events
-    //   {
-    //     title: "Meeting with Mr. boss",
-    //     start: Temporal.ZonedDateTime.from(
-    //       "2026-01-05T05:15:00+01:00[Europe/Berlin]"
-    //     ),
-    //     end: Temporal.ZonedDateTime.from(
-    //       "2026-01-05T06:00:00+01:00[Europe/Berlin]"
-    //     ),
-    //     id: "98d85d98541f",
-    //     calendarId: "work",
-    //   },
-    //   {
-    //     title: "Sipping Aperol Spritz on the beach",
-    //     start: Temporal.ZonedDateTime.from(
-    //       "2026-01-05T12:00:00+01:00[Europe/Berlin]"
-    //     ),
-    //     end: Temporal.ZonedDateTime.from(
-    //       "2026-01-05T15:20:00+01:00[Europe/Berlin]"
-    //     ),
-    //     id: "0d13aae3b8a1",
-    //     calendarId: "leisure",
-    //   },
-    // ],
-
     plugins: [
       eventsServicePlugin,
       eventModalPlugin,
@@ -363,6 +423,7 @@ export default function ScheduleXPage() {
     callbacks: {
       onDoubleClickDate,
       onClickDate,
+      onEventUpdate,
     },
   });
 
@@ -371,14 +432,10 @@ export default function ScheduleXPage() {
       eventsServicePlugin.set(scheduleXEvents);
       calendarControls.setCalendars(calendars);
     }
-  }, [scheduleXEvents, calendar, eventsServicePlugin]);
+  }, [scheduleXEvents, calendar, eventsServicePlugin, calendars, calendarControls]);
 
   if (loading) {
-    return (
-      <section className="p-4 px-20 container mx-auto">
-        <p>Loading families...</p>
-      </section>
-    );
+    return <SchedulePageSkeleton />;
   }
 
   if (!families || families.length === 0) {
@@ -409,19 +466,22 @@ export default function ScheduleXPage() {
           }}
         />
       </div>
-      <div>
-        <button
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={handleCreateEvent}
-        >
-          Create Event
-        </button>
+      <div className="min-w-[170px]">
+        <div className="md:fixed">
+          <button
+            className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={handleCreateEvent}
+          >
+            Create Event
+          </button>
 
-        <FamilyScheduleList
-          families={families}
-          disabledChildren={disabledChildren}
-          onToggleChild={toggleChildCalendar}
-        />
+          <FamilyScheduleList
+            families={families}
+            disabledChildren={disabledChildren}
+            onToggleChild={toggleChildCalendar}
+            user={user}
+          />
+        </div>
       </div>
     </section>
   );
