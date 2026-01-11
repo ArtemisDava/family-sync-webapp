@@ -34,7 +34,7 @@ function formatDateTime(date: unknown): string {
     "epochMilliseconds" in date
   ) {
     return new Date(
-      (date as { epochMilliseconds: number }).epochMilliseconds
+      (date as { epochMilliseconds: number }).epochMilliseconds,
     ).toLocaleString();
   }
 
