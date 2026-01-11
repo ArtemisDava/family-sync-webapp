@@ -97,4 +97,29 @@ export const UserService = {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   },
+
+  async searchUsers(
+    name: string,
+    token?: string,
+  ): Promise<{ _id: string; name: string; email: string }[]> {
+    try {
+      const result = await fetch(
+        `${API_DOMAIN}/api/users/search?name=${encodeURIComponent(name)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        },
+      );
+      if (!result.ok) {
+        throw new Error("Failed to search users");
+      }
+      return result.json();
+    } catch (error) {
+      console.error("Error searching users:", error);
+      throw error;
+    }
+  },
 };

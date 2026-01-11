@@ -3,6 +3,7 @@ import CreateEventModal from "../components/organisms/createEventModal";
 import CreateChildModal from "../components/organisms/createChildModal";
 import EditChildModal from "../components/organisms/editChildModal";
 import EventDetailsModal from "../components/organisms/eventDetailsModal";
+import InviteUserModal from "../components/organisms/inviteUserModal";
 import { type Event } from "../models/event";
 import type LoginInformation from "../models/loginInformation";
 
@@ -48,6 +49,12 @@ interface ModalContextType {
     value: Event | null,
     options?: { onEventDeleted?: () => void },
   ) => void;
+  invokeInviteUserModal: (
+    value: null | {
+      user: { _id: string; name: string; email: string };
+      families: { name: string; _id: string }[];
+    },
+  ) => void;
 }
 interface ModalProviderProps {
   children: React.ReactNode;
@@ -76,10 +83,15 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
     event: Event;
     onEventDeleted?: () => void;
   } | null>(null);
+  const [showInviteUserModal, setShowInviteUserModal] = useState<{
+    user: { _id: string; name: string; email: string };
+    families: { name: string; _id: string }[];
+  } | null>(null);
 
   const invokeCreateEventModal = setShowedCreateEventModal;
   const invokeCreateChildModal = setShowedCreateChildModal;
   const invokeEditChildModal = setShowedEditChildModal;
+  const invokeInviteUserModal = setShowInviteUserModal;
 
   const invokeEventDetailsModal = (
     value: Event | null,
@@ -100,6 +112,7 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
     invokeCreateChildModal,
     invokeEditChildModal,
     invokeEventDetailsModal,
+    invokeInviteUserModal,
   };
 
   return (
@@ -128,6 +141,12 @@ export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
           event={showEventDetailsModal.event}
           onClose={() => invokeEventDetailsModal(null)}
           onEventDeleted={showEventDetailsModal.onEventDeleted}
+        />
+      )}
+      {showInviteUserModal && (
+        <InviteUserModal
+          open={showInviteUserModal}
+          onClose={() => invokeInviteUserModal(null)}
         />
       )}
     </ModalContext.Provider>

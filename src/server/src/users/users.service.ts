@@ -81,4 +81,12 @@ export class UsersService {
   async getAdminCount(): Promise<number> {
     return this.userModel.countDocuments({ isAdmin: true }).exec();
   }
+
+  async searchByName(name: string): Promise<User[]> {
+    return this.userModel
+      .find({ name: { $regex: name, $options: 'i' } })
+      .select('-password')
+      .limit(10)
+      .exec();
+  }
 }

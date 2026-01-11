@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Req,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -29,6 +30,17 @@ export class UsersController {
       throw new ForbiddenException('Access denied. Authentication required.');
     }
     return this.usersService.findAll();
+  }
+
+  @Get('search')
+  searchByName(@Query('name') name: string, @Req() req: AuthenticatedRequest) {
+    if (!req.user) {
+      throw new ForbiddenException('Access denied. Authentication required.');
+    }
+    if (!name || name.trim().length === 0) {
+      return [];
+    }
+    return this.usersService.searchByName(name);
   }
 
   @Patch()

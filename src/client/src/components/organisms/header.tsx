@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { IonIcon } from "@ionic/react";
-import { menu } from "ionicons/icons";
+import { menu, searchOutline } from "ionicons/icons";
 import { handleMenu } from "./menu";
 import { Link, useLocation } from "react-router-dom";
 import Button from "@mui/material/Button";
 import { useUser } from "../../contexts/user.context";
+import { useModal } from "../../contexts/modal.context";
 import { useNavigate } from "react-router-dom";
+import { UserService } from "../../services/user.service";
+import { FamiliesService } from "../../services/families.service";
 
 const navLinks = [
   { name: "HOME", to: "/" },
@@ -29,12 +32,22 @@ const useMediaQuery = (query: string) => {
 };
 
 export default function Header() {
-  const { user, logout } = useUser();
+  const { user, logout, token } = useUser();
+  const { invokeInviteUserModal } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [menuState, setMenuState] = useState<"menu" | "close">("close");
   const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLLIElement>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<
+    { _id: string; name: string; email: string }[]
+  >([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [families, setFamilies] = useState<{ name: string; _id: string }[]>([]);
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
   const showMenu = isMobile ? menuState === "menu" : true;
@@ -50,6 +63,79 @@ export default function Header() {
       setMenuState("close");
     }
   }, [isMobile, menuState]);
+
+  useEffect(() => {
+    const fetchFamilies = async () => {
+      if (user && token) {
+        try {
+          const fetchedFamilies = await FamiliesService.getFamilies(token);
+          setFamilies(fetchedFamilies);
+        } catch (error) {
+          console.error("Error fetching families:", error);
+        }
+      }
+    };
+    fetchFamilies();
+  }, [user, token]);
+
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (searchQuery.trim().length === 0) {
+        setSearchResults([]);
+        setShowSearchResults(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const results = await UserService.searchUsers(
+          searchQuery,
+          token ?? undefined
+        );
+        setSearchResults(results);
+        setShowSearchResults(true);
+      } catch (error) {
+        console.error("Error searching users:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchUsers, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, token]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleUserClick = (selectedUser: {
+    _id: string;
+    name: string;
+    email: string;
+  }) => {
+    if (families.length === 0) {
+      alert("You need to be part of a family to invite users.");
+      return;
+    }
+    invokeInviteUserModal({
+      user: selectedUser,
+      families: families,
+    });
+    setShowSearchResults(false);
+    setSearchQuery("");
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -210,6 +296,51 @@ export default function Header() {
                   >
                     Logout
                   </Button>
+                </li>
+                <li className="mx-4 my-6 md:my-0 relative" ref={searchRef}>
+                  <div className="relative group">
+                    <div className="flex items-center border border-gray-300 rounded-full px-2 py-1 bg-white transition-all duration-300 ease-in-out hover:rounded-md focus-within:rounded-md">
+                      <IonIcon
+                        icon={searchOutline}
+                        className="text-gray-500 cursor-pointer text-lg shrink-0"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() =>
+                          searchQuery.length > 0 && setShowSearchResults(true)
+                        }
+                        className="outline-none text-sm w-0 group-hover:w-full lg:group-hover:w-40 focus:w-32 lg:focus:w-40 transition-all duration-300 ease-in-out group-hover:ml-2 focus:ml-2 peer"
+                      />
+                    </div>
+                    {showSearchResults && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto min-w-[200px]">
+                        {isSearching ? (
+                          <div className="p-3 text-center text-gray-500 text-sm">
+                            Searching...
+                          </div>
+                        ) : searchResults.length > 0 ? (
+                          searchResults.map((result) => (
+                            <div
+                              key={result._id}
+                              onClick={() => handleUserClick(result)}
+                              className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            >
+                              <p className="font-medium text-sm">
+                                {result.name}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-3 text-center text-gray-500 text-sm">
+                            No users found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </li>
               </>
             )}
