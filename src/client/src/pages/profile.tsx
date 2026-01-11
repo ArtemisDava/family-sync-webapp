@@ -160,7 +160,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <section className="text-black py-8 sm:py-12 lg:py-20 min-h-[80vh] max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+    <section className="text-black py-8 sm:py-2 lg:py-4 min-h-[80vh] max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
       <div className="w-full lg:max-w-[270px]">
         <div className="flex flex-col justify-between items-center mb-4 sm:mb-6 lg:mb-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-center">

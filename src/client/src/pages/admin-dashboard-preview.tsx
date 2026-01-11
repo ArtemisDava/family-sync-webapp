@@ -155,7 +155,7 @@ export default function AdminDashboardPreview() {
 
   return (
     <>
-      <section className="p-4 lg:px-20 container mx-auto w-full">
+      <section className="container  py-8 sm:py-2 lg:py-4 px-4 lg:px-0 max-w-6xl mx-auto">
         <div className="w-full flex flex-col lg:flex-row  gap-8">
           <Widget type="user" amount={overviewStats.totalUsers} />
           <Widget type="family" amount={overviewStats.totalFamilies} />

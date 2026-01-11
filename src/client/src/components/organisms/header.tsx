@@ -14,7 +14,7 @@ const navLinks = [
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = useState(
-    () => window.matchMedia(query).matches,
+    () => window.matchMedia(query).matches
   );
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function Header() {
     <header className="bg-white text-black h-24 z-15 relative">
       <nav
         ref={menuRef}
-        className="max-w-[72rem] mx-auto  bg-whitemd:px-4 xl:px-0 py-5 text-base  lg:flex md:items-center lg:justify-between"
+        className="max-w-6xl mx-auto  px-4 lg:px-0 bg-whitemd:px-4 xl:px-0 py-5 text-base  lg:flex md:items-center lg:justify-between"
       >
         <div className="flex justify-between items-center">
           <Link to="/" className="text-3xl font-bold cursor-pointer">

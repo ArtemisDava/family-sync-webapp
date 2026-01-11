@@ -30,7 +30,7 @@ function SchedulePageSkeleton() {
   const weeks = Array(5).fill(null);
 
   return (
-    <section className="p-4 lg:px-20 container mx-auto flex flex-wrap flex-col-reverse md:flex-row gap-8 w-full">
+    <section className="px-4 lg:px-0 container flex flex-wrap flex-col-reverse md:flex-row gap-8 mx-auto max-w-6xl">
       <div className="flex-1" style={{ minHeight: 500 }}>
         <div className="bg-white rounded-lg shadow-sm border p-4">
           <div className="flex items-center justify-between mb-4">
@@ -78,7 +78,7 @@ function SchedulePageSkeleton() {
                     />
                   )}
                 </div>
-              )),
+              ))
             )}
           </div>
         </div>
@@ -132,7 +132,7 @@ interface ScheduleXEvent {
 }
 
 function toScheduleXFormat(
-  events: ReturnType<typeof transformToCalendarEvents>,
+  events: ReturnType<typeof transformToCalendarEvents>
 ): ScheduleXEvent[] {
   return events.map((event, index) => {
     const calendarId = event.childId;
@@ -162,7 +162,7 @@ function formatDateForScheduleX(date: Date): Temporal.ZonedDateTime {
 }
 
 function generateCalendarsConfigWithColorMap(
-  events: ReturnType<typeof transformToCalendarEvents>,
+  events: ReturnType<typeof transformToCalendarEvents>
 ): {
   calendars: Record<
     string,
@@ -234,7 +234,7 @@ export default function ScheduleXPage() {
   const { token, user } = useUser();
 
   const [disabledChildren, setDisabledChildren] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const familiesRef = useRef<typeof families>(families);
@@ -258,7 +258,7 @@ export default function ScheduleXPage() {
         return newSet;
       });
     },
-    [],
+    []
   );
 
   const handleCreateEvent = useCallback(() => {
@@ -286,19 +286,19 @@ export default function ScheduleXPage() {
         eventsByChild,
         children,
         disabledChildren,
-        user,
+        user
       ),
-    [eventsByChild, children, disabledChildren, user],
+    [eventsByChild, children, disabledChildren, user]
   );
 
   const { calendars, childToCalendarId } = useMemo(
     () => generateCalendarsConfigWithColorMap(filteredEvents),
-    [filteredEvents],
+    [filteredEvents]
   );
 
   const scheduleXEvents = useMemo(
     () => toScheduleXFormat(filteredEvents, childToCalendarId),
-    [filteredEvents, childToCalendarId],
+    [filteredEvents, childToCalendarId]
   );
 
   const eventsServicePlugin = useMemo(() => createEventsServicePlugin(), []);
@@ -310,7 +310,7 @@ export default function ScheduleXPage() {
   const dragAndDropPlugin = useMemo(() => createDragAndDropPlugin(), []);
   const currentTimePlugin = useMemo(
     () => createCurrentTimePlugin({ fullWeekWidth: true }),
-    [],
+    []
   );
 
   const onDoubleClickDate = useCallback(
@@ -333,7 +333,7 @@ export default function ScheduleXPage() {
         user,
       });
     },
-    [invokeCreateEventModal, refetch, user],
+    [invokeCreateEventModal, refetch, user]
   );
 
   const onClickDate = useCallback(
@@ -356,7 +356,7 @@ export default function ScheduleXPage() {
         user,
       });
     },
-    [invokeCreateEventModal, refetch, user],
+    [invokeCreateEventModal, refetch, user]
   );
 
   const onEventUpdate = useCallback(
@@ -370,7 +370,7 @@ export default function ScheduleXPage() {
           updatedEvent.start.day,
           updatedEvent.start.hour,
           updatedEvent.start.minute,
-          updatedEvent.start.second,
+          updatedEvent.start.second
         ).toISOString();
 
         const endDate = new Date(
@@ -379,7 +379,7 @@ export default function ScheduleXPage() {
           updatedEvent.end.day,
           updatedEvent.end.hour,
           updatedEvent.end.minute,
-          updatedEvent.end.second,
+          updatedEvent.end.second
         ).toISOString();
 
         await EventsService.updateEvent(
@@ -388,14 +388,14 @@ export default function ScheduleXPage() {
             startDate,
             endDate,
           },
-          token,
+          token
         );
       } catch (error) {
         console.error("Error updating event:", error);
         refetch();
       }
     },
-    [token, refetch],
+    [token, refetch]
   );
 
   const calendar = useCalendarApp({
@@ -432,7 +432,13 @@ export default function ScheduleXPage() {
       eventsServicePlugin.set(scheduleXEvents);
       calendarControls.setCalendars(calendars);
     }
-  }, [scheduleXEvents, calendar, eventsServicePlugin, calendars, calendarControls]);
+  }, [
+    scheduleXEvents,
+    calendar,
+    eventsServicePlugin,
+    calendars,
+    calendarControls,
+  ]);
 
   if (loading) {
     return <SchedulePageSkeleton />;
@@ -447,7 +453,7 @@ export default function ScheduleXPage() {
   }
 
   return (
-    <section className="p-4 lg:px-20 container mx-auto flex flex-wrap flex-col-reverse md:flex-row gap-8 w-full">
+    <section className="px-4 lg:px-0 py-8 sm:py-2 lg:py-4  container lg:mx-auto flex flex-wrap flex-col-reverse md:flex-row gap-8 max-w-6xl">
       <div
         className="flex-1 sx-react-calendar-wrapper"
         style={{ minHeight: 500 }}

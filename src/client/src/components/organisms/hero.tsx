@@ -2,7 +2,7 @@ import Button from "@mui/material/Button";
 
 export default function Hero() {
   return (
-    <section className="bg-logo text-black py-20 h-[80vh] flex items-center max-w-[72rem] mx-auto">
+    <section className="bg-logo text-black py-8 sm:py-2 lg:py-4 h-[80vh] flex items-center px-4 lg:px-0 max-w-6xl mx-auto">
       <div className="container mx-auto px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Keep your family in sync — without the stress.{" "}
