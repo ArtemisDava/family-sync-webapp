@@ -19,10 +19,12 @@ export default function Hero() {
           type="submit"
           fullWidth={false}
           sx={{
-            px: 4,
+            px: 6,
             py: 2,
             textTransform: "none",
-            fontSize: "1rem",
+            fontWeight: "bold",
+            fontSize: "15px",
+            borderRadius: "16px",
           }}
         >
           Get Started
