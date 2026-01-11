@@ -4,4 +4,5 @@ export default interface LoginInformation {
   name: string;
   email: string;
   role: string;
+  color: string;
 }
