@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BaseModal from "../atoms/base-modal";
 import { FormControl, InputLabel } from "@mui/material";
-import { BootstrapInput } from "../../pages/add-child";
 import Button from "@mui/material/Button";
 import { useUser } from "../../contexts/user.context";
 import { EventsService } from "../../services/events.service";
 import { CategorySelect } from "../atoms/CategorySelect";
-import { CustomSelect } from "../atoms/CustomSelect";
+import { CustomSelect, type Option } from "../atoms/CustomSelect";
+import type LoginInformation from "../../models/loginInformation";
+import { BootstrapInput } from "./editChildModal";
 
 interface CreateEventModalProps {
   open: {
@@ -20,9 +21,20 @@ interface CreateEventModalProps {
       color?: string;
     }[];
     onEventCreated?: () => void;
+    user: LoginInformation | null;
   } | null;
   onClose: () => void;
 }
+function toDatetimeLocal(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}-` +
+    `${pad(d.getMonth() + 1)}-` +
+    `${pad(d.getDate())}T` +
+    `${pad(d.getHours())}:` +
+    `${pad(d.getMinutes())}`
+  );
+};
 
 export default function CreateEventModal({
   open,
@@ -31,35 +43,26 @@ export default function CreateEventModal({
   const { token } = useUser();
   const [title, setTitle] = useState("");
   const [familyId, setFamilyId] = useState("");
-  const [childId, setChildId] = useState("");
+  const [assignedId, setAssignedId] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  if (!open) return null;
 
-  const { families, children } = open;
-
-  // Prefill datetime inputs if start/end are provided
   useEffect(() => {
-    const toDatetimeLocal = (d: Date) => {
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return (
-        `${d.getFullYear()}-` +
-        `${pad(d.getMonth() + 1)}-` +
-        `${pad(d.getDate())}T` +
-        `${pad(d.getHours())}:` +
-        `${pad(d.getMinutes())}`
-      );
-    };
+    if (!open) return;
 
-    if (open?.start instanceof Date) {
+    if (open.start instanceof Date) {
       setStartDate(toDatetimeLocal(open.start));
     }
-    if (open?.end instanceof Date) {
+    if (open.end instanceof Date) {
       setEndDate(toDatetimeLocal(open.end));
     }
   }, [open]);
+
+  if (!open) return null;
+
+  const { families, children, user } = open;
 
   return (
     <BaseModal open={!!open} onClose={onClose} title="Create Event">
@@ -69,8 +72,12 @@ export default function CreateEventModal({
           e.preventDefault();
           try {
             const formData = new FormData(e.currentTarget);
+            const assignedId = formData.get("assigned")?.toString() || "";
+            const isAnAdultEvent = user && assignedId === user.userId;
+
             const information: {
-              childId: string;
+              childId: string | undefined;
+              adultId: string | undefined;
               eventData: {
                 title: string;
                 startDate: string;
@@ -81,7 +88,8 @@ export default function CreateEventModal({
               };
               token: string;
             } = {
-              childId: formData.get("child")?.toString() || "",
+              adultId: isAnAdultEvent ? user.userId : undefined,
+              childId: isAnAdultEvent ? undefined : assignedId,
               eventData: {
                 title: formData.get("title")?.toString() || "",
                 startDate: startDate ? new Date(startDate).toISOString() : "",
@@ -93,18 +101,25 @@ export default function CreateEventModal({
               token: token || "",
             };
 
-            console.log("Creating event:", information);
-            const createResult = await EventsService.addNewEventToChild(
-              information.childId,
-              information.eventData,
-              information.token
-            );
-            console.log("Event created successfully:", createResult);
+            if (!information.childId && !information.adultId) {
+              throw new Error("No valid target selected for the event.");
+            }
+            if (!isAnAdultEvent && information.childId) {
+              await EventsService.addNewEventToChild(
+                information.childId,
+                information.eventData,
+                information.token,
+              );
+            } else if (isAnAdultEvent && information.adultId) {
+              await EventsService.addNewEventToAdult(
+                familyId,
+                information.eventData,
+                information.token,
+              );
+            }
 
             if (open.onEventCreated) {
-              console.log("Calling refetch...");
               await Promise.resolve(open.onEventCreated());
-              console.log("Refetch completed");
             }
             onClose();
           } catch (error) {
@@ -133,7 +148,7 @@ export default function CreateEventModal({
             value={familyId}
             onChange={(value) => {
               setFamilyId(value);
-              setChildId("");
+              setAssignedId("");
             }}
             required
             placeholder="Select a family"
@@ -145,25 +160,32 @@ export default function CreateEventModal({
             }
           />
         </div>
-        {children.some((child) => child.family._id === familyId) && (
-          <div>
-            Child: *
-            <CustomSelect
-              name="child"
-              value={childId}
-              onChange={setChildId}
-              required
-              placeholder="Select a child"
-              options={children
+        <div>
+          Target: *
+          <CustomSelect
+            name="assigned"
+            value={assignedId}
+            onChange={setAssignedId}
+            required
+            placeholder="Select a child"
+            options={[
+              ...children
                 .filter((child) => child.family._id === familyId)
-                .map((child) => ({
+                .map<Option>((child) => ({
                   value: child._id,
                   label: child.name,
                   color: child.color,
-                }))}
-            />
-          </div>
-        )}
+                })),
+              user
+                ? {
+                  value: user.userId,
+                  label: "Myself",
+                  color: user.color,
+                }
+                : null,
+            ].filter((o): o is Option => o !== null)}
+          />
+        </div>
         <div>
           Category: *
           <CategorySelect
