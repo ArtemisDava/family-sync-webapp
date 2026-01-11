@@ -29,7 +29,7 @@ export function CategorySelect({
 }: CategorySelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Category | null>(
-    value ? categories.find((c) => c.value === value) || null : null
+    value ? categories.find((c) => c.value === value) || null : null,
   );
   const containerRef = useRef<HTMLDivElement>(null);
 
