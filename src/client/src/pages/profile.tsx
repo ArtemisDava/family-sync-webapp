@@ -1,40 +1,59 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { useUser } from "../contexts/user.context";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { IonIcon } from "@ionic/react";
-import { settingsOutline } from "ionicons/icons";
+import {
+  pencilOutline,
+  trashOutline,
+  checkmarkOutline,
+  linkOutline,
+  closeOutline,
+} from "ionicons/icons";
 import { FamiliesService } from "../services/families.service";
 import { Input } from "@mui/material";
 import { UserService } from "../services/user.service";
-import { Link } from "react-router-dom";
+import { ChildrenService } from "../services/children.service";
+import { type Family } from "../models/event";
+import Card from "../components/atoms/card";
+import { useModal } from "../contexts/modal.context";
+import { formatDate } from "../utils/date.utils";
 
-const fetchFamilies = async (token?: string) => {
-  try {
-    const families = await FamiliesService.getFamilies(token);
-    console.log("Fetched families:", families);
-  } catch (error) {
-    console.error("Error fetching families:", error);
-  }
-};
+const WEB_DOMAIN = import.meta.env.WEB_DOMAIN || "http://localhost:5173";
 
 export default function ProfilePage() {
-  const { user, token } = useUser();
+  const { user, token, setUser } = useUser();
+  const { invokeCreateChildModal, invokeEditChildModal } = useModal();
   const [toggleNewFamily, setToggleNewFamily] = React.useState(false);
-  const [families, setFamilies] = React.useState<any[]>([]);
+  const [families, setFamilies] = React.useState<Family[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [toggleEditProfile, setToggleEditProfile] = React.useState(false);
   const [email, setEmail] = React.useState(user?.email || "");
+  const [password, setPassword] = React.useState("");
+  const [color, setColor] = React.useState(user?.color || "#000000");
+  const [children, setChildren] = React.useState<{ _id: string, name: string, birthDate: string, color?: string, family: { _id: string }, guardians?: string[] }[] > ([]);
+  const [currentView, setCurrentView] = React.useState<
+    "settings" | "family" | "children"
+  >("family");
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [copiedFamilyId, setCopiedFamilyId] = useState<string | null>(null);
+  const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
+  const [editingFamilyName, setEditingFamilyName] = useState("");
 
   const loadFamilies = useCallback(async () => {
     if (token) {
       try {
         const fetchedFamilies = await FamiliesService.getFamilies(token);
+        const children = await ChildrenService.getChildrenByUser(
+          user?.userId || "",
+          token,
+        );
         setFamilies(fetchedFamilies);
+        setLoading(false);
+        setChildren(children);
       } catch (error) {
         console.error("Error fetching families:", error);
       }
     }
-  }, [token]);
+  }, [token, user?.userId]);
 
   useEffect(() => {
     if (!user) {
@@ -49,140 +68,674 @@ export default function ProfilePage() {
 
     const newFamily = await FamiliesService.createFamily(
       (e.target as HTMLFormElement).familyName.value,
-      token || ""
+      token || "",
     );
 
-    console.log("Created family:", newFamily);
     setFamilies((prevFamilies) => [...prevFamilies, newFamily]);
     setToggleNewFamily(false);
   };
 
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Profile Page</h1>
-      <p>This is the profile page. User details will be displayed here.</p>
+  const handleCopyInviteLink = (familyId: string) => {
+    const inviteLink = `${WEB_DOMAIN}/invite/${familyId}`;
+    navigator.clipboard.writeText(inviteLink);
+    setCopiedFamilyId(familyId);
+    setTimeout(() => setCopiedFamilyId(null), 2000);
+  };
 
-      <section className="mt-6  border border-black/20  rounded-lg shadow-sm p-4 flex flex-row justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold mb-2">User Information</h2>
-          <p>{user?.name}</p>
-          {!toggleEditProfile && <p>{email}</p>}
-          {toggleEditProfile && (
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          )}
-          <p>Managing {families.length} families</p>
-        </div>
-        <div className="flex gap-4">
-          {!toggleEditProfile && (
+  const handleStartEditFamily = (family: Family) => {
+    setEditingFamilyId(family._id);
+    setEditingFamilyName(family.name);
+  };
+
+  const handleCancelEditFamily = () => {
+    setEditingFamilyId(null);
+    setEditingFamilyName("");
+  };
+
+  const handleSaveFamilyName = async (familyId: string) => {
+    if (!editingFamilyName.trim()) {
+      alert("Family name cannot be empty");
+      return;
+    }
+    try {
+      await FamiliesService.updateFamily(
+        familyId,
+        { name: editingFamilyName.trim() },
+        token || "",
+      );
+      setFamilies((prev) =>
+        prev.map((f) =>
+          f._id === familyId ? { ...f, name: editingFamilyName.trim() } : f,
+        ),
+      );
+      setEditingFamilyId(null);
+      setEditingFamilyName("");
+    } catch (error) {
+      console.error("Error updating family name:", error);
+      alert("Failed to update family name. Please try again.");
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      const updateData: { email?: string; password?: string; color?: string } =
+        {};
+
+      if (email && email !== user?.email) {
+        updateData.email = email;
+      }
+      if (password) {
+        updateData.password = password;
+      }
+      if (color && color !== user?.color) {
+        updateData.color = color;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        alert("No changes to save");
+        setIsSaving(false);
+        return;
+      }
+
+      const updatedUser = await UserService.updateUser(updateData);
+      setUser(updatedUser);
+      alert("Settings saved successfully!");
+      setPassword("");
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      alert("Failed to save settings. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <section className="text-black py-8 sm:py-12 lg:py-20 min-h-[80vh] max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+      <div className="w-full lg:max-w-[270px]">
+        <div className="flex flex-col justify-between items-center mb-4 sm:mb-6 lg:mb-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center">
+            {user?.name}
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 mb-4">
+            {user?.email}
+          </p>
+          <div className="w-full flex flex-row lg:flex-col gap-2 overflow-x-auto">
             <Button
-              variant="contained"
-              color="primary"
-              className="mt-4"
-              onClick={() => setToggleEditProfile(true)}
+              variant={currentView === "settings" ? "contained" : "text"}
+              onClick={() => setCurrentView("settings")}
+              fullWidth
+              size="small"
             >
-              <IonIcon icon={settingsOutline} className="p-2 text-2xl" />
-              Edit Profile
+              Settings
             </Button>
-          )}
-          {toggleEditProfile && (
-            <>
-              <Button
-                variant="contained"
-                color="error"
-                className="mt-4 ml-4"
-                onClick={async () => {
-                  const confirmDelete = window.confirm(
-                    "Are you sure you want to delete your account? This action cannot be undone."
-                  );
-                  if (confirmDelete) {
-                    await UserService.deleteUser(user?.userId || "");
-                    window.location.href = "/";
-                  }
-                }}
-              >
-                Delete Account
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                className="mt-4"
-                onClick={() => {
-                  setToggleEditProfile(false);
-                  setEmail(user?.email || "");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                className="mt-4 ml-4"
-                onClick={async () => {
-                  try {
-                    const response = await UserService.updateUser({ email });
-                    alert("Profile updated successfully.");
-                    setToggleEditProfile(false);
-                  } catch (error) {
-                    console.error("Error updating profile:", error);
-                    setEmail(user?.email || "");
-                    setToggleEditProfile(false);
-                    alert("Failed to update profile.");
-                  }
-                }}
-              >
-                Save Changes
-              </Button>
-            </>
-          )}
-        </div>
-      </section>
-      <section className="mt-6">
-        <div className="flex flex-row justify-between items-center p-4">
-          <div className="flex flex-col">
-            <h2 className="text-xl font-semibold">Your families</h2>
-            <p>Manage your family groups and track shared expenses.</p>
+            <Button
+              variant={currentView === "family" ? "contained" : "text"}
+              onClick={() => setCurrentView("family")}
+              fullWidth
+              size="small"
+            >
+              My Family
+            </Button>
+            <Button
+              variant={currentView === "children" ? "contained" : "text"}
+              onClick={() => setCurrentView("children")}
+              fullWidth
+              size="small"
+            >
+              My Children
+            </Button>
+
+            <Button variant="contained" fullWidth size="small" color="error">
+              Logout
+            </Button>
           </div>
-          <div className="flex flex-col">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => setToggleNewFamily(true)}
-            >
-              Create Family
-            </Button>
-            {toggleNewFamily && (
-              <form className="mt-4" onSubmit={handleCreateFamily}>
-                <input
-                  type="text"
-                  placeholder="Family Name"
-                  className="border border-gray-300 rounded p-2 mr-2"
-                  name="familyName"
-                  required
+        </div>
+      </div>
+      <div className="w-full overflow-x-hidden">
+        {/* BEGIN SETTINGS VIEW */}
+        {currentView === "settings" && (
+          <div className="p-4 sm:p-6 bg-white rounded-lg shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Settings</h2>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm  font-bold text-gray-700 mb-1">
+                  Name:
+                </label>
+                <Input
+                  value={user?.name || ""}
+                  sx={{
+                    backgroundColor: "#0B6CEB1A",
+                    borderRadius: "8px",
+                    ":before": { borderBottom: "none" },
+                    fontWeight: "bold",
+                    px: "8px",
+                    py: "6px",
+                  }}
+                  fullWidth
                 />
-                <Button variant="contained" color="primary" type="submit">
-                  Create
+              </div>
+              <div>
+                <label className="block text-sm  font-bold text-gray-700 mb-1">
+                  Email:
+                </label>
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  fullWidth
+                  sx={{
+                    backgroundColor: "#0B6CEB1A",
+                    borderRadius: "8px",
+                    ":before": { borderBottom: "none" },
+                    fontWeight: "bold",
+                    px: "8px",
+                    py: "6px",
+                  }}
+                  type="email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm  font-bold text-gray-700 mb-1">
+                  Theme color:
+                </label>
+                <Input
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  fullWidth
+                  sx={{
+                    backgroundColor: "#0B6CEB1A",
+                    borderRadius: "8px",
+                    ":before": { borderBottom: "none" },
+                    fontWeight: "bold",
+                    px: "8px",
+                    py: "6px",
+                  }}
+                  type="color"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 mb-1 font-bold">
+                  Change Password:
+                </label>
+                <Input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  fullWidth
+                  sx={{
+                    backgroundColor: "#0B6CEB1A",
+                    borderRadius: "8px",
+                    ":before": { borderBottom: "none" },
+                    fontWeight: "bold",
+                    px: "8px",
+                    py: "6px",
+                  }}
+                  type="password"
+                  placeholder="Leave blank to keep current password"
+                />
+              </div>
+
+              <div className="flex flex-row gap-5">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ borderRadius: "8px", fontWeight: "bold" }}
+                  onClick={handleSaveSettings}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
-              </form>
+                <Button
+                  variant="contained"
+                  color="error"
+                  sx={{ borderRadius: "8px", fontWeight: "bold" }}
+                  onClick={() => {
+                    const confirmDelete = window.confirm(
+                      "Are you sure you want to delete your account? This action cannot be undone.",
+                    );
+                    if (confirmDelete) {
+                      UserService.deleteUser(token || "");
+                      window.location.href = "/";
+                    }
+                  }}
+                >
+                  Delete Account
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* END SETTINGS VIEW */}
+
+        {/* BEGIN FAMILY VIEW */}
+        {currentView === "family" && (
+          <>
+            {toggleNewFamily && (
+              <div className="mb-6 sm:mb-8 p-4 sm:p-6 border rounded-lg bg-white shadow-sm">
+                <h2 className="text-lg sm:text-xl font-bold mb-4">
+                  Create New Family
+                </h2>
+                <form
+                  onSubmit={handleCreateFamily}
+                  className="flex flex-col gap-4"
+                >
+                  <Input
+                    name="familyName"
+                    placeholder="Family Name"
+                    required
+                    fullWidth
+                  />
+                  <div className="flex gap-4">
+                    <Button variant="contained" color="primary" type="submit">
+                      Create
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setToggleNewFamily(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {families.length === 0 && !loading && !toggleNewFamily && (
+              <>
+                <div className="text-center mb-6 sm:mb-8 p-4 sm:p-6 bg-white rounded-lg shadow-sm">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                    You are not part of any families yet.
+                  </h2>
+                  <p className="text-sm sm:text-base text-gray-600 mb-4">
+                    Create a new family to get started.
+                  </p>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setToggleNewFamily(true)}
+                  >
+                    Create New Family
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {families.map((family) => (
+              <div key={family._id}>
+                <div
+                  key={family._id}
+                  className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-5 rounded-t-md"
+                >
+                  <div className="flex gap-3 sm:gap-5 items-center w-full sm:w-auto">
+                    {editingFamilyId === family._id ? (
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <Input
+                          value={editingFamilyName}
+                          onChange={(e) => setEditingFamilyName(e.target.value)}
+                          size="small"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter")
+                              handleSaveFamilyName(family._id);
+                            if (e.key === "Escape") handleCancelEditFamily();
+                          }}
+                          className="text-lg font-semibold"
+                        />
+                        <button
+                          onClick={() => handleSaveFamilyName(family._id)}
+                          className="shrink-0 text-green-600 hover:text-green-800 transition-colors bg-green-300/20 border shadow-sm rounded-full p-1 flex items-center justify-center"
+                          title="Save"
+                        >
+                          <IonIcon
+                            icon={checkmarkOutline}
+                            className="text-2xl"
+                          />
+                        </button>
+                        <button
+                          onClick={handleCancelEditFamily}
+                          className="shrink-0 text-gray-500 hover:text-red-600 transition-colors bg-red-300/20 border shadow-sm rounded-full p-1 flex items-center justify-center"
+                          title="Cancel"
+                        >
+                          <IonIcon icon={closeOutline} className="text-2xl" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="font-semibold truncate">{family.name}</p>
+                        <button
+                          className="shrink-0 text-gray-500 hover:text-blue-600 transition-colors"
+                          onClick={() => handleStartEditFamily(family)}
+                          title="Edit family name"
+                        >
+                          <IonIcon
+                            icon={pencilOutline}
+                            className="text-lg sm:text-xl"
+                          />
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-800"
+                          onClick={async () => {
+                            const confirmRemove = window.confirm(
+                              `Are you sure you want to delete the family "${family.name}"? This action cannot be undone.`,
+                            );
+                            if (confirmRemove && token) {
+                              await FamiliesService.deleteFamily(
+                                family._id,
+                                token,
+                              );
+                              loadFamilies();
+                            }
+                          }}
+                        >
+                          <IonIcon icon={trashOutline} className="text-xl" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex gap-3 sm:gap-5 w-full sm:w-auto justify-end">
+                    <Tooltip
+                      title={
+                        copiedFamilyId === family._id
+                          ? "Copied!"
+                          : "Copy invite link to clipboard"
+                      }
+                      arrow
+                    >
+                      <button
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${copiedFamilyId === family._id
+                            ? "bg-green-100 text-green-700 border border-green-300"
+                            : "text-[#0B6CEB] font-bold "
+                          }`}
+                        onClick={() => handleCopyInviteLink(family._id)}
+                      >
+                        {copiedFamilyId === family._id
+                          ? "Copied!"
+                          : "Copy Invitation Link"}
+                        <IonIcon
+                          icon={
+                            copiedFamilyId === family._id
+                              ? checkmarkOutline
+                              : linkOutline
+                          }
+                          className="text-base"
+                        />
+                      </button>
+                    </Tooltip>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                  {family.members
+                    .filter((member) => member._id != user?.userId)
+                    .map((member) => {
+                      const birthDate = new Date(member.birthDate);
+                      const ageDifMs = Date.now() - birthDate.getTime();
+                      const ageDate = new Date(ageDifMs);
+                      const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+                      return (
+                        <>
+                          <Card className="flex flex-col gap-2 h-full relative bg-white w-[270px] px-4 py-3">
+                            <button
+                              className="absolute top-2 right-2 text-red-600 hover:text-red-800 z-10"
+                              onClick={async () => {
+                                const confirmRemove = window.confirm(
+                                  `Are you sure you want to remove ${member.name} from the family?`,
+                                );
+                                if (confirmRemove && token) {
+                                  await FamiliesService.removeFamilyMember(
+                                    family._id,
+                                    member._id,
+                                    token,
+                                  );
+                                  loadFamilies();
+                                }
+                              }}
+                            >
+                              <IonIcon
+                                icon={trashOutline}
+                                className="text-xl"
+                              />
+                            </button>
+                            <h2 className="text-lg sm:text-xl font-bold pr-8">
+                              {member.name}
+                            </h2>
+                            <p className="capitalize text-sm sm:text-base">
+                              {member.role}
+                            </p>
+                            <div className="flex flex-row items-center gap-5">
+                              <div className="flex flex-col gap-3 text-[#828282] text-xs">
+                                <p>Birthdate:</p>
+                                <p>Age:</p>
+                                <p>Theme Color: </p>
+                              </div>
+                              <div className="flex flex-col gap-3 text-[#1E1E1E] text-xs font-semibold">
+                                <p>{formatDate(member.birthDate)}</p>
+                                <p>{age} years</p>
+                                <span
+                                  style={{ backgroundColor: member.color }}
+                                  className="px-2 py-2 rounded-full w-full inline-block"
+                                ></span>
+                              </div>
+                            </div>
+                          </Card>
+                        </>
+                      );
+                    })}
+                  {family.children.map((child) => (
+                    <div key={child._id}>
+                      <Card className="flex flex-col gap-2 h-full relative bg-white w-[270px] px-4 py-3">
+                        <button
+                          className="absolute top-2 right-10 text-blue-600 hover:text-blue-800 z-10"
+                          onClick={() => {
+                            invokeEditChildModal({
+                              child: {
+                                _id: child._id,
+                                name: child.name,
+                                birthDate: child.birthDate,
+                                color: child.color,
+                                family: family._id,
+                                guardians:
+                                  child.guardians || [],
+                              },
+                              familyMembers: family.members.map((m) => ({
+                                _id: m._id,
+                                name: m.name,
+                              })),
+                              onChildUpdated: loadFamilies,
+                            });
+                          }}
+                          title="Edit child"
+                        >
+                          <IonIcon icon={pencilOutline} className="text-xl" />
+                        </button>
+                        <button
+                          className="absolute top-2 right-2 text-red-600 hover:text-red-800 z-10"
+                          onClick={async () => {
+                            const confirmRemove = window.confirm(
+                              `Are you sure you want to remove ${child.name} from the family?`,
+                            );
+                            if (confirmRemove && token) {
+                              await FamiliesService.removeChildFromFamily(
+                                family._id,
+                                child._id,
+                                token,
+                              );
+                              loadFamilies();
+                            }
+                          }}
+                        >
+                          <IonIcon icon={trashOutline} className="text-xl" />
+                        </button>
+                        <h2 className="text-lg sm:text-xl font-bold pr-8">
+                          {child.name}
+                        </h2>
+                        <p className="capitalize text-sm sm:text-base">Child</p>
+                        <div>
+                          <div className="flex flex-row items-center gap-5">
+                            <div className="flex flex-col gap-3 text-[#828282] text-xs">
+                              <p>Birthdate:</p>
+                              <p>Age:</p>
+                              <p>Theme Color: </p>
+                            </div>
+                            <div className="flex flex-col gap-3 text-[#1E1E1E] text-xs font-semibold">
+                              <p>{formatDate(child.birthDate)}</p>
+                              <p>
+                                {(() => {
+                                  const birthDate = new Date(child.birthDate);
+                                  const ageDifMs =
+                                    Date.now() - birthDate.getTime();
+                                  const ageDate = new Date(ageDifMs);
+                                  return Math.abs(
+                                    ageDate.getUTCFullYear() - 1970,
+                                  );
+                                })()}{" "}
+                                years
+                              </p>
+                              <span
+                                style={{ backgroundColor: child.color }}
+                                className="px-2 py-2 rounded-full w-full inline-block"
+                              ></span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {families.length > 0 && !toggleNewFamily && (
+              <div className="mb-4 flex flex-col justify-center py-8">
+                <div className="mt-2 flex justify-center">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setToggleNewFamily(true)}
+                  >
+                    Create New Family
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        {/* END FAMILY VIEW */}
+
+        {/* BEGIN CHILDREN VIEW */}
+        {currentView === "children" && (
+          <div className="">
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-5 rounded-t-md">
+              <div className="flex gap-3 sm:gap-5">
+                <p className="font-semibold">My Children</p>
+              </div>
+              <div className="flex gap-3 sm:gap-5 w-full sm:w-auto">
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    invokeCreateChildModal({
+                      families: families.map((f) => ({
+                        name: f.name,
+                        _id: f._id,
+                        members: f.members,
+                      })),
+                      onChildCreated: loadFamilies,
+                    });
+                  }}
+                  disabled={families.length === 0}
+                  size="small"
+                  fullWidth
+                  className="sm:w-auto"
+                >
+                  Create New Child
+                </Button>
+              </div>
+            </div>
+            {children.length === 0 ? (
+              <p className="text-gray-600">No children added yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {children.map((child) => (
+                  <Card
+                    key={child._id}
+                    className="flex flex-col gap-2 p-3 sm:p-4 justify-baseline h-full relative bg-white"
+                  >
+                    <button
+                      className="absolute top-2 right-10 text-blue-600 hover:text-blue-800 z-10"
+                      onClick={() => {
+                        invokeEditChildModal({
+                          child: {
+                            _id: child._id,
+                            name: child.name,
+                            birthDate: child.birthDate,
+                            color: child.color,
+                            family: child.family._id,
+                            guardians:
+                              child.guardians || [],
+                          },
+                          familyMembers:
+                            families
+                              .find((f) => f._id === child.family._id)
+                              ?.members.map((m) => ({
+                                _id: m._id,
+                                name: m.name,
+                              })) || [],
+                          onChildUpdated: loadFamilies,
+                        });
+                      }}
+                      title="Edit child"
+                    >
+                      <IonIcon icon={pencilOutline} className="text-xl" />
+                    </button>
+                    <button
+                      className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+                      onClick={async () => {
+                        const confirmRemove = window.confirm(
+                          `Are you sure you want to remove ${child.name}?`,
+                        );
+                        if (confirmRemove && token) {
+                          await FamiliesService.removeChildFromFamily(
+                            child.family._id,
+                            child._id,
+                            token,
+                          );
+                          loadFamilies();
+                        }
+                      }}
+                    >
+                      <IonIcon icon={trashOutline} className="text-xl" />
+                    </button>
+                    <h2 className="text-lg sm:text-xl font-bold pr-8">
+                      {child.name}
+                    </h2>
+                    <p className="text-gray-600 text-xs sm:text-sm">
+                      Birthdate: {formatDate(child.birthDate)}
+                    </p>
+                    <p className="text-gray-600 text-xs sm:text-sm">
+                      Age:{" "}
+                      {(() => {
+                        const birthDate = new Date(child.birthDate);
+                        const ageDifMs = Date.now() - birthDate.getTime();
+                        const ageDate = new Date(ageDifMs);
+                        return Math.abs(ageDate.getUTCFullYear() - 1970);
+                      })()}{" "}
+                      years
+                    </p>
+                    <p className="text-gray-600 text-sm flex gap-2 items-center">
+                      <span className="min-w-fit">Color: </span>
+                      <span
+                        style={{ backgroundColor: child.color }}
+                        className="px-2 py-2 rounded-full w-full inline-block"
+                      ></span>
+                    </p>
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 min-h-[200px]">
-          {families.map((family) => (
-            <Link
-              key={family._id}
-              className="border border-gray-300 rounded-lg p-4 shadow hover:shadow-lg transition"
-              to={`/families/${family._id}`}
-            >
-              <h3 className="text-lg font-semibold mb-2">{family.name}</h3>
-              <p>Members: {family.members.length}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </div>
+        )}
+        {/* END CHILDREN VIEW */}
+      </div>
+    </section>
   );
 }
