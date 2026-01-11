@@ -3,11 +3,11 @@ import { useUser } from "../contexts/user.context";
 import { Button, Tooltip } from "@mui/material";
 import { IonIcon } from "@ionic/react";
 import {
-  pencilOutline,
   trashOutline,
   checkmarkOutline,
   linkOutline,
   closeOutline,
+  settingsOutline,
 } from "ionicons/icons";
 import { FamiliesService } from "../services/families.service";
 import { Input } from "@mui/material";
@@ -29,7 +29,16 @@ export default function ProfilePage() {
   const [email, setEmail] = React.useState(user?.email || "");
   const [password, setPassword] = React.useState("");
   const [color, setColor] = React.useState(user?.color || "#000000");
-  const [children, setChildren] = React.useState<{ _id: string, name: string, birthDate: string, color?: string, family: { _id: string }, guardians?: string[] }[] > ([]);
+  const [children, setChildren] = React.useState<
+    {
+      _id: string;
+      name: string;
+      birthDate: string;
+      color?: string;
+      family: { _id: string };
+      guardians?: string[];
+    }[]
+  >([]);
   const [currentView, setCurrentView] = React.useState<
     "settings" | "family" | "children"
   >("family");
@@ -44,7 +53,7 @@ export default function ProfilePage() {
         const fetchedFamilies = await FamiliesService.getFamilies(token);
         const children = await ChildrenService.getChildrenByUser(
           user?.userId || "",
-          token,
+          token
         );
         setFamilies(fetchedFamilies);
         setLoading(false);
@@ -68,7 +77,7 @@ export default function ProfilePage() {
 
     const newFamily = await FamiliesService.createFamily(
       (e.target as HTMLFormElement).familyName.value,
-      token || "",
+      token || ""
     );
 
     setFamilies((prevFamilies) => [...prevFamilies, newFamily]);
@@ -101,12 +110,12 @@ export default function ProfilePage() {
       await FamiliesService.updateFamily(
         familyId,
         { name: editingFamilyName.trim() },
-        token || "",
+        token || ""
       );
       setFamilies((prev) =>
         prev.map((f) =>
-          f._id === familyId ? { ...f, name: editingFamilyName.trim() } : f,
-        ),
+          f._id === familyId ? { ...f, name: editingFamilyName.trim() } : f
+        )
       );
       setEditingFamilyId(null);
       setEditingFamilyName("");
@@ -160,7 +169,7 @@ export default function ProfilePage() {
           <p className="text-sm sm:text-base text-gray-600 mb-4">
             {user?.email}
           </p>
-          <div className="w-full flex flex-row lg:flex-col gap-2 overflow-x-auto">
+          <div className="w-full flex flex-col sm:flex-row lg:flex-col gap-2 overflow-x-auto">
             <Button
               variant={currentView === "settings" ? "contained" : "text"}
               onClick={() => setCurrentView("settings")}
@@ -279,7 +288,11 @@ export default function ProfilePage() {
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ borderRadius: "8px", fontWeight: "bold" }}
+                  sx={{
+                    borderRadius: "8px",
+                    fontWeight: "bold",
+                    fontSize: "12px",
+                  }}
                   onClick={handleSaveSettings}
                   disabled={isSaving}
                 >
@@ -288,10 +301,14 @@ export default function ProfilePage() {
                 <Button
                   variant="contained"
                   color="error"
-                  sx={{ borderRadius: "8px", fontWeight: "bold" }}
+                  sx={{
+                    borderRadius: "8px",
+                    fontWeight: "bold",
+                    fontSize: "12px",
+                  }}
                   onClick={() => {
                     const confirmDelete = window.confirm(
-                      "Are you sure you want to delete your account? This action cannot be undone.",
+                      "Are you sure you want to delete your account? This action cannot be undone."
                     );
                     if (confirmDelete) {
                       UserService.deleteUser(token || "");
@@ -353,6 +370,7 @@ export default function ProfilePage() {
                     variant="contained"
                     color="primary"
                     onClick={() => setToggleNewFamily(true)}
+                    sx={{ fontWeight: "bold", fontSize: "12px" }}
                   >
                     Create New Family
                   </Button>
@@ -364,9 +382,9 @@ export default function ProfilePage() {
               <div key={family._id}>
                 <div
                   key={family._id}
-                  className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-5 rounded-t-md"
+                  className="mb-4 flex flex-col-reverse sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-8 lg:p-4 rounded-t-md"
                 >
-                  <div className="flex gap-3 sm:gap-5 items-center w-full sm:w-auto">
+                  <div className="flex gap-3 sm:gap-4 items-center w-full sm:w-auto">
                     {editingFamilyId === family._id ? (
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         <Input
@@ -401,14 +419,16 @@ export default function ProfilePage() {
                       </div>
                     ) : (
                       <>
-                        <p className="font-semibold truncate">{family.name}</p>
+                        <p className="text-lg md:text-2xl font-bold truncate">
+                          {family.name}
+                        </p>
                         <button
                           className="shrink-0 text-gray-500 hover:text-blue-600 transition-colors"
                           onClick={() => handleStartEditFamily(family)}
                           title="Edit family name"
                         >
                           <IonIcon
-                            icon={pencilOutline}
+                            icon={settingsOutline}
                             className="text-lg sm:text-xl"
                           />
                         </button>
@@ -416,12 +436,12 @@ export default function ProfilePage() {
                           className="text-red-600 hover:text-red-800"
                           onClick={async () => {
                             const confirmRemove = window.confirm(
-                              `Are you sure you want to delete the family "${family.name}"? This action cannot be undone.`,
+                              `Are you sure you want to delete the family "${family.name}"? This action cannot be undone.`
                             );
                             if (confirmRemove && token) {
                               await FamiliesService.deleteFamily(
                                 family._id,
-                                token,
+                                token
                               );
                               loadFamilies();
                             }
@@ -442,10 +462,11 @@ export default function ProfilePage() {
                       arrow
                     >
                       <button
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${copiedFamilyId === family._id
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          copiedFamilyId === family._id
                             ? "bg-green-100 text-green-700 border border-green-300"
                             : "text-[#0B6CEB] font-bold "
-                          }`}
+                        }`}
                         onClick={() => handleCopyInviteLink(family._id)}
                       >
                         {copiedFamilyId === family._id
@@ -463,7 +484,7 @@ export default function ProfilePage() {
                     </Tooltip>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="px-4 lg:px-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
                   {family.members
                     .filter((member) => member._id != user?.userId)
                     .map((member) => {
@@ -474,18 +495,18 @@ export default function ProfilePage() {
 
                       return (
                         <>
-                          <Card className="flex flex-col gap-2 h-full relative bg-white w-[270px] px-4 py-3">
+                          <Card className="flex flex-col gap-2 h-full relative bg-white w-full  px-4 py-3">
                             <button
                               className="absolute top-2 right-2 text-red-600 hover:text-red-800 z-10"
                               onClick={async () => {
                                 const confirmRemove = window.confirm(
-                                  `Are you sure you want to remove ${member.name} from the family?`,
+                                  `Are you sure you want to remove ${member.name} from the family?`
                                 );
                                 if (confirmRemove && token) {
                                   await FamiliesService.removeFamilyMember(
                                     family._id,
                                     member._id,
-                                    token,
+                                    token
                                   );
                                   loadFamilies();
                                 }
@@ -496,14 +517,15 @@ export default function ProfilePage() {
                                 className="text-xl"
                               />
                             </button>
-                            <h2 className="text-lg sm:text-xl font-bold pr-8">
+                            <h2 className="text-base font-bold pr-8">
                               {member.name}
                             </h2>
-                            <p className="capitalize text-sm sm:text-base">
+                            <p className="capitalize text-xs font-semibold text-[#1E1E1E]">
                               {member.role}
                             </p>
+                            <span className="inline-block w-full h-px bg-[#1E1E1E10] rounded-full"></span>
                             <div className="flex flex-row items-center gap-5">
-                              <div className="flex flex-col gap-3 text-[#828282] text-xs">
+                              <div className="flex font-bold flex-col gap-3 text-[#828282] text-xs">
                                 <p>Birthdate:</p>
                                 <p>Age:</p>
                                 <p>Theme Color: </p>
@@ -523,9 +545,9 @@ export default function ProfilePage() {
                     })}
                   {family.children.map((child) => (
                     <div key={child._id}>
-                      <Card className="flex flex-col gap-2 h-full relative bg-white w-[270px] px-4 py-3">
+                      <Card className="flex flex-col gap-2 h-full relative bg-white w-full  px-4 py-3">
                         <button
-                          className="absolute top-2 right-10 text-blue-600 hover:text-blue-800 z-10"
+                          className="absolute top-2 right-10 text-gray-400 hover:text-blue-800 z-10"
                           onClick={() => {
                             invokeEditChildModal({
                               child: {
@@ -534,8 +556,7 @@ export default function ProfilePage() {
                                 birthDate: child.birthDate,
                                 color: child.color,
                                 family: family._id,
-                                guardians:
-                                  child.guardians || [],
+                                guardians: child.guardians || [],
                               },
                               familyMembers: family.members.map((m) => ({
                                 _id: m._id,
@@ -546,19 +567,19 @@ export default function ProfilePage() {
                           }}
                           title="Edit child"
                         >
-                          <IonIcon icon={pencilOutline} className="text-xl" />
+                          <IonIcon icon={settingsOutline} className="text-xl" />
                         </button>
                         <button
                           className="absolute top-2 right-2 text-red-600 hover:text-red-800 z-10"
                           onClick={async () => {
                             const confirmRemove = window.confirm(
-                              `Are you sure you want to remove ${child.name} from the family?`,
+                              `Are you sure you want to remove ${child.name} from the family?`
                             );
                             if (confirmRemove && token) {
                               await FamiliesService.removeChildFromFamily(
                                 family._id,
                                 child._id,
-                                token,
+                                token
                               );
                               loadFamilies();
                             }
@@ -566,13 +587,16 @@ export default function ProfilePage() {
                         >
                           <IonIcon icon={trashOutline} className="text-xl" />
                         </button>
-                        <h2 className="text-lg sm:text-xl font-bold pr-8">
+                        <h2 className="text-base font-bold pr-8">
                           {child.name}
                         </h2>
-                        <p className="capitalize text-sm sm:text-base">Child</p>
+                        <p className="capitalize text-xs font-semibold text-[#1E1E1E]">
+                          Child
+                        </p>
+                        <span className="inline-block w-full h-px bg-[#1E1E1E10] rounded-full"></span>
                         <div>
                           <div className="flex flex-row items-center gap-5">
-                            <div className="flex flex-col gap-3 text-[#828282] text-xs">
+                            <div className="flex font-bold flex-col gap-3 text-[#828282] text-xs">
                               <p>Birthdate:</p>
                               <p>Age:</p>
                               <p>Theme Color: </p>
@@ -586,7 +610,7 @@ export default function ProfilePage() {
                                     Date.now() - birthDate.getTime();
                                   const ageDate = new Date(ageDifMs);
                                   return Math.abs(
-                                    ageDate.getUTCFullYear() - 1970,
+                                    ageDate.getUTCFullYear() - 1970
                                   );
                                 })()}{" "}
                                 years
@@ -612,6 +636,7 @@ export default function ProfilePage() {
                     variant="outlined"
                     color="primary"
                     onClick={() => setToggleNewFamily(true)}
+                    sx={{ fontWeight: "bold", fontSize: "12px" }}
                   >
                     Create New Family
                   </Button>
@@ -625,9 +650,9 @@ export default function ProfilePage() {
         {/* BEGIN CHILDREN VIEW */}
         {currentView === "children" && (
           <div className="">
-            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-5 rounded-t-md">
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-4 rounded-t-md">
               <div className="flex gap-3 sm:gap-5">
-                <p className="font-semibold">My Children</p>
+                <p className="text-lg md:text-2xl font-bold">My Children</p>
               </div>
               <div className="flex gap-3 sm:gap-5 w-full sm:w-auto">
                 <Button
@@ -646,8 +671,9 @@ export default function ProfilePage() {
                   size="small"
                   fullWidth
                   className="sm:w-auto"
+                  sx={{ fontWeight: "bold", fontSize: "12px" }}
                 >
-                  Create New Child
+                  ADD CHILD
                 </Button>
               </div>
             </div>
@@ -658,10 +684,10 @@ export default function ProfilePage() {
                 {children.map((child) => (
                   <Card
                     key={child._id}
-                    className="flex flex-col gap-2 p-3 sm:p-4 justify-baseline h-full relative bg-white"
+                    className="flex flex-col gap-2 p-4 sm:p-4 justify-baseline h-full relative bg-white"
                   >
                     <button
-                      className="absolute top-2 right-10 text-blue-600 hover:text-blue-800 z-10"
+                      className="absolute top-2 right-10 text-gray-400 hover:text-blue-800 z-10"
                       onClick={() => {
                         invokeEditChildModal({
                           child: {
@@ -670,8 +696,7 @@ export default function ProfilePage() {
                             birthDate: child.birthDate,
                             color: child.color,
                             family: child.family._id,
-                            guardians:
-                              child.guardians || [],
+                            guardians: child.guardians || [],
                           },
                           familyMembers:
                             families
@@ -685,19 +710,19 @@ export default function ProfilePage() {
                       }}
                       title="Edit child"
                     >
-                      <IonIcon icon={pencilOutline} className="text-xl" />
+                      <IonIcon icon={settingsOutline} className="text-xl" />
                     </button>
                     <button
                       className="absolute top-2 right-2 text-red-600 hover:text-red-800"
                       onClick={async () => {
                         const confirmRemove = window.confirm(
-                          `Are you sure you want to remove ${child.name}?`,
+                          `Are you sure you want to remove ${child.name}?`
                         );
                         if (confirmRemove && token) {
                           await FamiliesService.removeChildFromFamily(
                             child.family._id,
                             child._id,
-                            token,
+                            token
                           );
                           loadFamilies();
                         }
@@ -705,29 +730,37 @@ export default function ProfilePage() {
                     >
                       <IonIcon icon={trashOutline} className="text-xl" />
                     </button>
-                    <h2 className="text-lg sm:text-xl font-bold pr-8">
-                      {child.name}
-                    </h2>
-                    <p className="text-gray-600 text-xs sm:text-sm">
-                      Birthdate: {formatDate(child.birthDate)}
+                    <h2 className="text-base font-bold pr-8">{child.name}</h2>
+                    <p className="capitalize text-xs font-semibold text-[#1E1E1E]">
+                      Child
                     </p>
-                    <p className="text-gray-600 text-xs sm:text-sm">
-                      Age:{" "}
-                      {(() => {
-                        const birthDate = new Date(child.birthDate);
-                        const ageDifMs = Date.now() - birthDate.getTime();
-                        const ageDate = new Date(ageDifMs);
-                        return Math.abs(ageDate.getUTCFullYear() - 1970);
-                      })()}{" "}
-                      years
-                    </p>
-                    <p className="text-gray-600 text-sm flex gap-2 items-center">
-                      <span className="min-w-fit">Color: </span>
-                      <span
-                        style={{ backgroundColor: child.color }}
-                        className="px-2 py-2 rounded-full w-full inline-block"
-                      ></span>
-                    </p>
+                    <span className="inline-block w-full h-px bg-[#1E1E1E10] rounded-full"></span>
+                    <div>
+                      <div className="flex flex-row items-center gap-5">
+                        <div className="flex font-bold flex-col gap-3 text-[#828282] text-xs">
+                          <p>Birthdate:</p>
+                          <p>Age:</p>
+                          <p>Theme Color: </p>
+                        </div>
+                        <div className="flex flex-col gap-3 text-[#1E1E1E] text-xs font-semibold">
+                          <p>{formatDate(child.birthDate)}</p>
+                          <p>
+                            {(() => {
+                              const birthDate = new Date(child.birthDate);
+                              const ageDifMs = Date.now() - birthDate.getTime();
+                              const ageDate = new Date(ageDifMs);
+                              return Math.abs(ageDate.getUTCFullYear() - 1970);
+                            })()}{" "}
+                            years
+                          </p>
+
+                          <span
+                            style={{ backgroundColor: child.color }}
+                            className="px-2 py-2 rounded-full w-full inline-block"
+                          ></span>
+                        </div>
+                      </div>
+                    </div>
                   </Card>
                 ))}
               </div>
