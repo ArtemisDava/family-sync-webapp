@@ -31,7 +31,7 @@ export default function InvitePage() {
       navigate(`/singup?invite=${params.code}`);
     }
     joinFamily();
-  }, [token, navigate]);
+  }, [token, navigate, joinFamily, params.code]);
 
   return <div>Invite Page</div>;
 }
