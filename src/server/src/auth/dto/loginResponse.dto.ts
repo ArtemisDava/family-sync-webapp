@@ -4,4 +4,5 @@ export default class LoginResponse {
   email: string;
   name: string;
   role: string;
+  color: string;
 }
