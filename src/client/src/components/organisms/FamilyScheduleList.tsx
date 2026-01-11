@@ -1,16 +1,19 @@
 import React from "react";
 import type { Family, Children } from "../../models/event";
+import type LoginInformation from "../../models/loginInformation";
 
 interface FamilyScheduleListProps {
   families: Family[];
   disabledChildren: Set<string>;
-  onToggleChild: (childId: string) => void;
+  onToggleChild: (childId: string, familyId?: string) => void;
+  user: LoginInformation | null;
 }
 
 export function FamilyScheduleList({
   families,
   disabledChildren,
   onToggleChild,
+  user,
 }: FamilyScheduleListProps) {
   return (
     <div>
@@ -21,6 +24,7 @@ export function FamilyScheduleList({
           family={family}
           disabledChildren={disabledChildren}
           onToggleChild={onToggleChild}
+          user={user}
         />
       ))}
     </div>
@@ -30,33 +34,43 @@ export function FamilyScheduleList({
 interface FamilyCardProps {
   family: Family;
   disabledChildren: Set<string>;
-  onToggleChild: (childId: string) => void;
+  onToggleChild: (childId: string, familyId?: string) => void;
+  user: LoginInformation | null;
 }
 
 function FamilyCard({
   family,
   disabledChildren,
   onToggleChild,
+  user,
 }: FamilyCardProps) {
   return (
-    <div className="mb-4 p-2 border border-gray-300 rounded">
+    <div className="mb-4 p-2 border bg-white border-gray-300 rounded">
       <h2 className="font-bold">{family.name}</h2>
       <ul className="space-y-1 mt-2">
         {family.children.map((child: Children) => (
           <ChildToggleItem
             key={child._id}
             child={child}
-            isEnabled={!disabledChildren.has(child._id)}
-            onToggle={() => onToggleChild(child._id)}
+            isEnabled={!disabledChildren.has(child._id + "-" + family._id)}
+            onToggle={() => onToggleChild(child._id, family._id)}
           />
         ))}
+        {user && (
+          <ChildToggleItem
+            key={user.userId}
+            child={user}
+            isEnabled={!disabledChildren.has(user.userId + "-" + family._id)}
+            onToggle={() => onToggleChild(user.userId, family._id)}
+          />
+        )}
       </ul>
     </div>
   );
 }
 
 interface ChildToggleItemProps {
-  child: Children;
+  child: Children | LoginInformation;
   isEnabled: boolean;
   onToggle: () => void;
 }
