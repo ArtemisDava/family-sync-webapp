@@ -35,6 +35,10 @@ export class CreateEventDto {
   @IsOptional()
   child?: string;
 
+  @IsMongoId()
+  @IsOptional()
+  adult?: string;
+
   @IsEnum(['shared', 'private'])
   @IsOptional()
   visibility?: string;
