@@ -48,7 +48,7 @@ export const ChildrenService = {
   async patchChild(
     childId: string,
     data: Partial<CreateChildDto>,
-    token: string
+    token: string,
   ) {
     try {
       const response = await fetch(`${API_DOMAIN}/api/children/${childId}`, {
@@ -78,7 +78,7 @@ export const ChildrenService = {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Failed to fetch children by user");
