@@ -60,15 +60,14 @@ export function CustomSelect({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Hidden input for form submission */}
       <input
         type="hidden"
         name={name}
         value={selected?.value || ""}
         required={required}
+        className="w-full"
       />
 
-      {/* Custom select button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -78,7 +77,7 @@ export function CustomSelect({
           <span className="flex items-center gap-2">
             {selected.color && (
               <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-3 h-3 rounded-full shrink-0"
                 style={{ backgroundColor: selected.color }}
               />
             )}
@@ -121,7 +120,7 @@ export function CustomSelect({
               >
                 {option.color && (
                   <span
-                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    className="w-3 h-3 rounded-full shrink-0"
                     style={{ backgroundColor: option.color }}
                   />
                 )}
