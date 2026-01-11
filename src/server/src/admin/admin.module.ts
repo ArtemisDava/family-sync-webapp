@@ -10,6 +10,11 @@ import { Family, FamilySchema } from '../families/entities/family.entity';
 import { User, UserSchema } from '../users/entities/user.entity';
 import { Child, ChildSchema } from '../children/entities/child.entity';
 import { AuthCheckMiddleware } from '../auth-check/auth-check.middleware';
+import {
+  ConnectionLog,
+  ConnectionLogSchema,
+} from 'src/connection_logs/entities/connection_log.entity';
+import { ConnectionLogsService } from 'src/connection_logs/connection_logs.service';
 
 @Module({
   imports: [
@@ -19,10 +24,16 @@ import { AuthCheckMiddleware } from '../auth-check/auth-check.middleware';
       { name: Child.name, schema: ChildSchema },
       { name: Family.name, schema: FamilySchema },
       { name: User.name, schema: UserSchema },
+      { name: ConnectionLog.name, schema: ConnectionLogSchema },
     ]),
   ],
   controllers: [AdminController],
-  providers: [AdminService, UsersService, FamiliesService],
+  providers: [
+    AdminService,
+    UsersService,
+    FamiliesService,
+    ConnectionLogsService,
+  ],
 })
 export class AdminModule {
   configure(consumer: MiddlewareConsumer) {
