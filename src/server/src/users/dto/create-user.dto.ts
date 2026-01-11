@@ -5,6 +5,7 @@ import {
   MinLength,
   IsOptional,
   IsEnum,
+  IsDateString,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -20,6 +21,14 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsDateString()
+  @IsNotEmpty()
+  birthDate: string;
+
+  @IsString()
+  @IsNotEmpty()
+  color: string;
 
   @IsString()
   @IsOptional()
