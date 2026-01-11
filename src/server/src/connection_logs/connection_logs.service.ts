@@ -14,12 +14,11 @@ export class ConnectionLogsService {
     private connectionModel: Model<ConnectionLogDocument>,
   ) {}
 
-  async create(userId: ObjectId, ip: string, userAgent: string) {
+  async create(userId: ObjectId, ipAddress: string, userAgent: string) {
     const newLog = new this.connectionModel({
       userId,
-      ip,
+      ipAddress,
       userAgent,
-      timestamp: new Date(),
     });
     return await newLog.save();
   }
@@ -27,10 +26,15 @@ export class ConnectionLogsService {
   async getTotalConnectionsByMonth() {
     const result = await this.connectionModel.aggregate([
       {
+        $addFields: {
+          timestampDate: { $toDate: '$timestamp' },
+        },
+      },
+      {
         $group: {
           _id: {
-            year: { $year: '$timestamp' },
-            month: { $month: '$timestamp' },
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
           },
           totalConnections: { $sum: 1 },
         },
