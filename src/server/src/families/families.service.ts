@@ -38,7 +38,13 @@ export class FamiliesService {
       { $addToSet: { families: family._id } },
     );
 
-    return savedFamily;
+    const populatedFamily = await this.familyModel
+      .findById(savedFamily._id)
+      .populate('members', '-password')
+      .populate('children')
+      .exec();
+
+    return populatedFamily!;
   }
 
   async findAll(): Promise<Family[]> {

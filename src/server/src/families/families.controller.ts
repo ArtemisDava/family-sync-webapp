@@ -8,8 +8,6 @@ import {
   UseGuards,
   Param,
   Delete,
-  Query,
-  ForbiddenException,
 } from '@nestjs/common';
 import { FamiliesService } from './families.service';
 import { CreateFamilyDto } from './dto/create-family.dto';
