@@ -70,7 +70,7 @@ export function CategorySelect({
         {selected ? (
           <span className="flex items-center gap-2">
             <span
-              className="w-3 h-3 rounded-full flex-shrink-0"
+              className="w-3 h-3 rounded-full shrink-0"
               style={{ backgroundColor: selected.color }}
             />
             {selected.label}
@@ -106,7 +106,7 @@ export function CategorySelect({
               }`}
             >
               <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-3 h-3 rounded-full shrink-0"
                 style={{ backgroundColor: category.color }}
               />
               {category.label}
