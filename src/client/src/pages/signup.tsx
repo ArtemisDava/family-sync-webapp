@@ -2,11 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import { UserService } from "../services/user.service";
-import { useUser } from "../contexts/user.context";
-import type LoginInformation from "../models/loginInformation";
 import { Link } from "react-router-dom";
 import type { SignUpDto } from "../models/signup.dto";
-import type { SignUpResponseDto } from "../models/signupResponse.dto";
 import { useSearchParams } from "react-router-dom";
 import { IonIcon } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
@@ -15,6 +12,8 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [color, setColor] = useState("#3b82f6");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -28,6 +27,8 @@ export default function SignupPage() {
       email,
       name,
       password,
+      birthDate,
+      color,
     };
 
     try {
@@ -36,31 +37,33 @@ export default function SignupPage() {
       setEmail("");
       setName("");
       setPassword("");
+      setBirthDate("");
+      setColor("#3b82f6");
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
       setError(
         error instanceof Error
           ? error.message
-          : "Login failed. Please try again."
+          : "Login failed. Please try again.",
       );
     }
   };
 
   return (
-    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container">
-      <div className="mb-6 bg-logo lg:w-1/2 min-h-[86vh] flex items-center justify-center">
+    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container max-w-6xl">
+      <div className="mb-6 bg-logo2 lg:w-1/2 min-h-[86vh] flex items-center justify-center">
         <h1 className="text-3xl font-bold">Family Sync!</h1>
       </div>
       <div className="lg:w-1/2 p-6">
         <button
-          className="flex items-center gap-2 mb-12 cursor-pointer opcacity-75 hover:opacity-100"
+          className="flex items-center gap-2 mb-4 cursor-pointer opacity-75 hover:opacity-100"
           onClick={() => navigate(-1)}
         >
           <IonIcon icon={arrowBack} className="p-2 text-" />
           <span className="text-md font-medium cursor-pointer">Back</span>
         </button>
-        <h1 className="text-2xl font-bold mb-4">Create an account</h1>
+        <h1 className="text-2xl font-bold mb-2">Create an account</h1>
 
         <form
           className="flex flex-col w-full my-20
@@ -99,6 +102,34 @@ export default function SignupPage() {
               name="name"
               onChange={(e) => setName(e.target.value)}
               className="px-3 py-2 bg-white/10 font-normal border border-black/50 rounded-md p-2"
+              required
+            />
+            <label
+              className="flex flex-col gap-1 text-base font-bold"
+              htmlFor="birthDate"
+            >
+              Birth Date
+            </label>
+            <input
+              type="date"
+              value={birthDate}
+              name="birthDate"
+              onChange={(e) => setBirthDate(e.target.value)}
+              className="px-3 py-2 bg-white/10 font-normal border border-black/50 rounded-md p-2"
+              required
+            />
+            <label
+              className="flex flex-col gap-1 text-base font-bold"
+              htmlFor="color"
+            >
+              Favorite Color
+            </label>
+            <input
+              type="color"
+              value={color}
+              name="color"
+              onChange={(e) => setColor(e.target.value)}
+              className="h-12 w-full cursor-pointer rounded-md border border-black/50"
               required
             />
             <label
