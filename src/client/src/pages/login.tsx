@@ -38,25 +38,25 @@ export default function LoginPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Login failed. Please try again."
+          : "Login failed. Please try again.",
       );
     }
   };
 
   return (
-    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container">
-      <div className="mb-6 bg-logo lg:w-1/2 min-h-[86vh] flex items-center justify-center">
+    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container max-w-[72rem]">
+      <div className="mb-6 bg-logo2 lg:w-1/2 min-h-[86vh] flex items-center justify-center">
         <h1 className="text-3xl font-bold">Family Sync!</h1>
       </div>
       <div className="lg:w-1/2 p-6">
         <button
-          className="flex items-center gap-2 mb-12 cursor-pointer opcacity-75 hover:opacity-100"
+          className="flex items-center gap-2 mb-4 cursor-pointer opcacity-75 hover:opacity-100"
           onClick={() => navigate(-1)}
         >
           <IonIcon icon={arrowBack} className="p-2 text-" />
           <span className="text-md font-medium cursor-pointer">Back</span>
         </button>
-        <h1 className="text-2xl font-bold mb-4">Welcome back!</h1>
+        <h1 className="text-2xl font-bold mb-2">Welcome back!</h1>
 
         <form className="my-20" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-4 mb-4">
