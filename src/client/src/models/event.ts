@@ -7,13 +7,13 @@ export interface Event {
   child: string;
   createdBy: string;
   visibility: string;
-  sharedWith: any[];
+  sharedWith: unknown[];
   isRecurring: boolean;
   category: string;
   location: string;
-  reminders: any[];
+  reminders: unknown[];
   isAllDay: boolean;
-  notes: any[];
+  notes: unknown[];
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -37,6 +37,8 @@ export interface Member {
   _id: string;
   email: string;
   name: string;
+  birthDate: string;
+  color: string;
   families: string[];
   role: string;
   isAdmin: boolean;
