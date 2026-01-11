@@ -47,6 +47,7 @@ export class AuthService {
       email: user.email,
       name: user.name,
       userId: user._id!.toString(),
+      color: user.color,
       role: user.isAdmin ? 'admin' : user.role,
     };
   }
