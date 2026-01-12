@@ -35,11 +35,12 @@ export function transformToCalendarEvents(
   children: Children[],
   disabledChildren: Set<string>,
   user: LoginInformation | null,
+  membersColorsMap: Map<string, string>,
 ): CalendarEvent[] {
   const childrenColorMap = new Map(children.map((c) => [c._id, c.color ?? ""]));
   childrenColorMap.set(user?.userId ?? "", user?.color ?? "");
 
-  const result = children
+  const childEvents = children
     .map((child) => {
       return Object.entries(eventsByChild)
         .filter(
@@ -64,32 +65,37 @@ export function transformToCalendarEvents(
     })
     .flat();
 
-  result.push(
-    ...Object.entries(eventsByChild)
-      .filter(([childId]) => childId === (user?.userId ?? ""))
-      .flatMap(([childId, events]) =>
-        events
-          .map((event: CreateEventDto & { _id: string }) => {
-            if (disabledChildren.has(childId + "-" + event.family)) {
-              return null;
-            }
+  const adultEvents = Object.entries(eventsByChild)
+    .filter(([childId]) => childId === (user?.userId ?? ""))
+    .flatMap(([childId, events]) =>
+      events
+        .map((event: CreateEventDto & { _id: string; adult?: string }) => {
+          const memberToCheck = event.adult || childId;
+          if (disabledChildren.has(memberToCheck + "-" + event.family)) {
+            return null;
+          }
 
-            return {
-              ...event,
-              start: new Date(event.startDate),
-              end: event.endDate
-                ? new Date(event.endDate)
-                : new Date(event.startDate),
-              title: event.title,
-              color: childrenColorMap.get(childId) ?? "",
-              calendarId: childId,
-              childId,
-              id: event._id,
-            };
-          })
-          .filter((e) => e !== null),
-      ),
-  );
+          const color = event.adult 
+            ? membersColorsMap.get(event.adult) ?? childrenColorMap.get(childId) ?? ""
+            : childrenColorMap.get(childId) ?? "";
 
-  return result;
+          const calendarId = event.adult || childId;
+
+          return {
+            ...event,
+            start: new Date(event.startDate),
+            end: event.endDate
+              ? new Date(event.endDate)
+              : new Date(event.startDate),
+            title: event.title,
+            color,
+            calendarId,
+            childId: calendarId,
+            id: event._id,
+          };
+        })
+        .filter((e) => e !== null),
+    );
+
+  return [...childEvents, ...adultEvents];
 }

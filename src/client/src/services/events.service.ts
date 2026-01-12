@@ -85,6 +85,7 @@ export const EventsService = {
       category: string;
       location: string;
       family: string;
+      adult?: string;
     },
     token?: string,
   ) {
