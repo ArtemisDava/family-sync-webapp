@@ -71,9 +71,9 @@ export class EventsController {
   @Get('adult/:familyId')
   findByAdult(
     @Param('familyId') familyId: string,
-    @Query('userId') userId: string,
+    @Req() { user }: AuthenticatedRequest,
   ) {
-    return this.eventsService.findByAdult(familyId, userId);
+    return this.eventsService.findByAdult(familyId, user.userId);
   }
 
   @Get('user/:userId')

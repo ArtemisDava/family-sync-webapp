@@ -86,7 +86,11 @@ export class EventsService {
       ];
     }
 
-    return this.eventModel.find(query).sort({ startDate: 1 }).exec();
+    return this.eventModel
+      .find(query)
+      .sort({ startDate: 1 })
+      .populate('createdBy')
+      .exec();
   }
 
   async findByChild(childId: string): Promise<Event[]> {
@@ -283,6 +287,8 @@ export class EventsService {
     createEventDto.adult = userId;
     createEventDto.family = familyId;
 
+    console.log('Creating event for adult with data:', createEventDto);
+
     return this.create(createEventDto, userId);
   }
 
@@ -307,6 +313,10 @@ export class EventsService {
         { sharedWith: userId },
       ];
     }
-    return this.eventModel.find(query).sort({ startDate: 1 }).exec();
+    return this.eventModel
+      .find(query)
+      .sort({ startDate: 1 })
+      .populate('createdBy')
+      .exec();
   }
 }
