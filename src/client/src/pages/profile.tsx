@@ -19,7 +19,7 @@ import Card from "../components/atoms/card";
 import { useModal } from "../contexts/modal.context";
 import { formatDate } from "../utils/date.utils";
 
-const WEB_DOMAIN = window.location.hostname || "http://localhost:5173";
+const WEB_DOMAIN = window.location.hostname;
 
 export default function ProfilePage() {
   const { user, token, setUser } = useUser();
@@ -113,7 +113,13 @@ export default function ProfilePage() {
   };
 
   const handleCopyInviteLink = (familyId: string) => {
-    const inviteLink = `${WEB_DOMAIN}/invite/${familyId}/${user?.userId}`;
+    let domain;
+    if (WEB_DOMAIN.includes("localhost")) {
+      domain = "http://localhost:5173";
+    } else {
+      domain = WEB_DOMAIN;
+    }
+    const inviteLink = `${domain}/invite/${familyId}/${user?.userId}`;
     navigator.clipboard.writeText(inviteLink);
     setCopiedFamilyId(familyId);
     setTimeout(() => setCopiedFamilyId(null), 2000);
