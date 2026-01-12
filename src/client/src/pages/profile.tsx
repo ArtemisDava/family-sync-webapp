@@ -19,7 +19,7 @@ import Card from "../components/atoms/card";
 import { useModal } from "../contexts/modal.context";
 import { formatDate } from "../utils/date.utils";
 
-const WEB_DOMAIN = import.meta.env.WEB_DOMAIN || "http://localhost:5173";
+const WEB_DOMAIN = window.location.hostname || "http://localhost:5173";
 
 export default function ProfilePage() {
   const { user, token, setUser } = useUser();
