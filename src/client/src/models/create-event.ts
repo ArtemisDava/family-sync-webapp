@@ -10,6 +10,8 @@ export interface CreateEventDto {
   family: string;
 
   child?: string;
+  
+  adult?: string;
 
   // @IsEnum(['shared', 'private'])
   visibility?: string;
