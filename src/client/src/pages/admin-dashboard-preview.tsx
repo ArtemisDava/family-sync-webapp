@@ -1,7 +1,6 @@
 import Widget from "../components/molecules/admin-card";
 import Chart from "../components/molecules/user-vs-freq-chart";
-import { useCallback, useEffect, useState } from "react";
-import { AdminService } from "../services/admin.service";
+import { useEffect, useState } from "react";
 import type OverviewStats from "../models/overview-stats";
 import Card from "../components/atoms/card";
 import {
@@ -28,16 +27,11 @@ type OverviewStatsWithUsersMock = OverviewStats & {
 };
 
 export default function AdminDashboardPreview() {
-  const [overviewStats, setOverviewStats] =
-    useState<null | OverviewStatsWithUsersMock>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<
-    OverviewStatsWithUsersMock["users"]
-  >(overviewStats ? overviewStats.users : []);
-
-  const overviewStatsCallback = useCallback(async () => {
-    const overviewStatsResponse = await AdminService.getOverviewStats();
-    overviewStatsResponse.users = [
+  const mockData: OverviewStatsWithUsersMock = {
+    totalUsers: 6,
+    totalFamilies: 7,
+    totalAdmins: 1,
+    users: [
       {
         _id: "1",
         name: "Jerry Smith",
@@ -140,18 +134,18 @@ export default function AdminDashboardPreview() {
         countOfChildren: 2,
         createdAt: new Date("2023-07-20"),
       },
-    ];
-    setOverviewStats(overviewStatsResponse);
-    setFilteredUsers(overviewStatsResponse.users);
-  }, []);
+    ],
+  };
+
+  const [overviewStats] = useState<OverviewStatsWithUsersMock>(mockData);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<
+    OverviewStatsWithUsersMock["users"]
+  >(mockData.users);
 
   useEffect(() => {
-    overviewStatsCallback();
-  }, [overviewStatsCallback]);
-
-  if (!overviewStats) {
-    return <div>Loading...</div>;
-  }
+    setFilteredUsers(mockData.users);
+  }, []);
 
   return (
     <>
