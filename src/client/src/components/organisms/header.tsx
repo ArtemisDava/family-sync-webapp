@@ -12,7 +12,7 @@ import { FamiliesService } from "../../services/families.service";
 
 const navLinks = [
   { name: "HOME", to: "/" },
-  { name: "ABOUT", to: "/" },
+  { name: "ABOUT", to: "/about" },
 ];
 
 const useMediaQuery = (query: string) => {
@@ -161,7 +161,7 @@ export default function Header() {
 
   const navLinksClasses = "text-base hover:text-[#6DBE45] duration-200";
 
-  if (location.pathname === "/login" || location.pathname === "/singup") {
+  if ((location.pathname === "/login" && !isMobile) || (location.pathname === "/signup" && !isMobile)) {
     return null;
   }
 
@@ -184,9 +184,9 @@ export default function Header() {
         {showMenu && (
           <ul className="lg:flex lg:items-center bg-white z-10 lg:z-auto lg:static absolute  w-full left-0 lg:w-auto lg:py-0 py-4 lg:pl-0 pl-4 top-[70px] transition-all ease-in duration-200">
             {navLinks.map((link) => (
-              <li key={link.name} className="text-black mx-4 my-6 md:my-0">
+              <li key={link.name}>
                 <Button
-                  href="/"
+                  href={link.to}
                   className={navLinksClasses}
                   variant="text"
                   color="inherit"
@@ -225,7 +225,7 @@ export default function Header() {
             {user && (
               <>
                 {user.role === "admin" && (
-                  <li className="mx-4 my-6 md:my-0">
+                  <li>
                     <Button
                       variant="text"
                       size="small"
@@ -237,13 +237,13 @@ export default function Header() {
                           background: "transparent",
                         },
                       }}
-                      onClick={() => navigate("/admin/preview")}
+                      onClick={() => navigate("/admin")}
                     >
                       Admin Panel
                     </Button>
                   </li>
                 )}
-                <li className="mx-4 my-6 md:my-0">
+                <li>
                   <Button
                     variant="text"
                     size="small"
@@ -260,7 +260,7 @@ export default function Header() {
                     Schedule
                   </Button>
                 </li>
-                <li className="mx-4 my-6 md:my-0">
+                <li>
                   <Button
                     variant="text"
                     size="small"
@@ -277,7 +277,7 @@ export default function Header() {
                     Profile
                   </Button>
                 </li>
-                <li className="my-6 md:my-0 md:mx-0">
+                <li>
                   <Button
                     variant="text"
                     sx={{
@@ -285,8 +285,6 @@ export default function Header() {
                       ":hover": {
                         fontWeight: "bold",
                         background: "transparent",
-                        padding: 0,
-                        margin: 0,
                       },
                     }}
                     onClick={() => {
@@ -297,7 +295,7 @@ export default function Header() {
                     Logout
                   </Button>
                 </li>
-                <li className="mx-4 my-6 md:my-0 relative" ref={searchRef}>
+                <li ref={searchRef}>
                   <div className="relative group">
                     <div className="flex items-center border border-gray-300 rounded-full px-2 py-1 bg-white transition-all duration-300 ease-in-out hover:rounded-md focus-within:rounded-md">
                       <IonIcon
