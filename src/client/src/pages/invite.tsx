@@ -28,10 +28,10 @@ export default function InvitePage() {
 
   useEffect(() => {
     if (!token) {
-      navigate(`/singup?invite=${params.code}`);
+      navigate(`/signup?invite=${params.code}-${params.userId}`);
     }
     joinFamily();
-  }, [token, navigate, joinFamily, params.code]);
+  }, [token, navigate, joinFamily, params.code, params.userId]);
 
   return <div>Invite Page</div>;
 }
