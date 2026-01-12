@@ -29,6 +29,7 @@ export default function SignupPage() {
       password,
       birthDate,
       color,
+      ...(invite ? { invite } : {}),
     };
 
     try {
@@ -45,17 +46,17 @@ export default function SignupPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Login failed. Please try again.",
+          : "Login failed. Please try again."
       );
     }
   };
 
   return (
-    <div className="flex items-center justify-center gap-6  min-h-[86vh] p-6 lg:p-0 mx-auto container max-w-6xl">
-      <div className="mb-6 bg-logo2 lg:w-1/2 min-h-[86vh] flex items-center justify-center">
-        <h1 className="text-3xl font-bold">Family Sync!</h1>
+    <div className="flex items-center justify-center lg:gap-6  min-h-[86vh] lg:p-0 mx-auto lg:max-w-[72rem] flex-col lg:flex-row">
+      <div className="mb-6 bg-logo2 max-w-sm min-w-xs lg:w-1/2 lg:max-w-none min-h-60 lg:min-h-[86vh] flex items-center justify-center">
+        <h1 className="text-3xl font-bold mt-12">Family-Sync</h1>
       </div>
-      <div className="lg:w-1/2 p-6">
+      <div className="w-full lg:w-1/2 p-6">
         <button
           className="flex items-center gap-2 mb-4 cursor-pointer opacity-75 hover:opacity-100"
           onClick={() => navigate(-1)}
@@ -66,11 +67,11 @@ export default function SignupPage() {
         <h1 className="text-2xl font-bold mb-2">Create an account</h1>
 
         <form
-          className="flex flex-col w-full my-20
-          text-start gap-8 text-base font-normal"
+          className="flex flex-col w-full my-8 lg:my-20
+          text-start  gap-2 lg:gap-4 mb-4 text-base font-normal"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 lg:gap-4 mb-4">
             {invite && (
               <div className="p-4 bg-green-600 rounded text-white text-center font-bold">
                 You have been invited! Please sign up to join.
@@ -87,7 +88,7 @@ export default function SignupPage() {
               value={email}
               name="email"
               onChange={(e) => setEmail(e.target.value)}
-              className="px-3 py-2 bg-white/10 font-normal border border-black/50 rounded-md p-2"
+              className="bg-white/10 font-normal border border-black/50 rounded-md p-1"
               required
             />
             <label
@@ -101,7 +102,7 @@ export default function SignupPage() {
               value={name}
               name="name"
               onChange={(e) => setName(e.target.value)}
-              className="px-3 py-2 bg-white/10 font-normal border border-black/50 rounded-md p-2"
+              className="bg-white/10 font-normal border border-black/50 rounded-md p-1"
               required
             />
             <label
@@ -115,21 +116,21 @@ export default function SignupPage() {
               value={birthDate}
               name="birthDate"
               onChange={(e) => setBirthDate(e.target.value)}
-              className="px-3 py-2 bg-white/10 font-normal border border-black/50 rounded-md p-2"
+              className="bg-white/10 font-normal border border-black/50 rounded-md p-1"
               required
             />
             <label
               className="flex flex-col gap-1 text-base font-bold"
               htmlFor="color"
             >
-              Favorite Color
+              Theme Color
             </label>
             <input
               type="color"
               value={color}
               name="color"
               onChange={(e) => setColor(e.target.value)}
-              className="h-12 w-full cursor-pointer rounded-md border border-black/50"
+              className="h-8 w-full cursor-pointer rounded-md border border-black/50"
               required
             />
             <label
@@ -143,7 +144,7 @@ export default function SignupPage() {
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="px-3 bg-white/10 py-2  font-normal border border-black/50 rounded-md p-2"
+              className="bg-white/10 font-normal border border-black/50 rounded-md p-1"
               required
             />
           </div>
@@ -156,6 +157,7 @@ export default function SignupPage() {
               size="small"
               color="inherit"
               type="submit"
+              sx={{ px: 4, py: 0.5 }}
             >
               Sign up
             </Button>
@@ -164,7 +166,7 @@ export default function SignupPage() {
             <span>Do you have an account?</span>
             <Link
               to={"/login"}
-              className="w-full border border-black/50 mx-auto text-center rounded-md p-2"
+              className="w-full border border-black/50 mx-auto text-center rounded-md p-1"
             >
               Sign in
             </Link>
