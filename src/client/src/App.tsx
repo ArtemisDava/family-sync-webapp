@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/admin-dashboard";
 import { ModalProvider } from "./contexts/modal.context";
 import { useUser } from "./contexts/user.context";
 import AdminDashboardPreview from "./pages/admin-dashboard-preview";
+import About from "./pages/about";
 
 function App() {
   return (
@@ -20,10 +21,11 @@ function App() {
           <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/singup" element={<SignupPage />} />
+            <Route path="/signup" element={<SignupPage />} />
             <Route path="/*" element={<ProtectedRoutes />} />
-            <Route path="/invite/:code" element={<InvitePage />} />
+            <Route path="/invite/:code/:userId" element={<InvitePage />} />
           </Routes>
         </BrowserRouter>
       </ModalProvider>
@@ -40,7 +42,6 @@ function ProtectedRoutes() {
 
   return (
     <Routes>
-      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/preview" element={<AdminDashboardPreview />} />
       <Route path="/profile" element={<ProfilePage />} />
