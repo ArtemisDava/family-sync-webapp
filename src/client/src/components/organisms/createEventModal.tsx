@@ -34,7 +34,7 @@ function toDatetimeLocal(d: Date) {
     `${pad(d.getHours())}:` +
     `${pad(d.getMinutes())}`
   );
-};
+}
 
 export default function CreateEventModal({
   open,
@@ -117,13 +117,13 @@ export default function CreateEventModal({
               await EventsService.addNewEventToChild(
                 information.eventData.child,
                 information.eventData,
-                information.token,
+                information.token
               );
             } else if (isAnAdultEvent && information.eventData.adult) {
               await EventsService.addNewEventToAdult(
                 familyId,
                 information.eventData,
-                information.token,
+                information.token
               );
             }
 
@@ -176,7 +176,7 @@ export default function CreateEventModal({
             value={assignedId}
             onChange={setAssignedId}
             required
-            placeholder="Select a child"
+            placeholder="Select a target"
             options={[
               ...children
                 .filter((child) => child.family._id === familyId)
@@ -187,10 +187,10 @@ export default function CreateEventModal({
                 })),
               user
                 ? {
-                  value: user.userId,
-                  label: user.name,
-                  color: user.color,
-                }
+                    value: user.userId,
+                    label: user.name,
+                    color: user.color,
+                  }
                 : null,
             ].filter((o): o is Option => o !== null)}
           />
@@ -262,7 +262,7 @@ export default function CreateEventModal({
           />
         </FormControl>
 
-                <FormControl variant="standard">
+        <FormControl variant="standard">
           <InputLabel shrink className="text-xl font-bold" htmlFor="notes">
             Notes
           </InputLabel>
