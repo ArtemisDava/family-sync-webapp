@@ -287,8 +287,6 @@ export class EventsService {
     createEventDto.adult = userId;
     createEventDto.family = familyId;
 
-    console.log('Creating event for adult with data:', createEventDto);
-
     return this.create(createEventDto, userId);
   }
 
