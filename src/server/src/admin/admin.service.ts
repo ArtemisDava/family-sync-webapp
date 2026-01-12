@@ -8,7 +8,6 @@ import { FamiliesService } from '../families/families.service';
 import { ConnectionLogsService } from 'src/connection_logs/connection_logs.service';
 import { User, UserDocument } from '../users/entities/user.entity';
 
-// Type definitions for aggregation results
 export interface ConnectionsByMonth {
   _id: { year: number; month: number };
   totalConnections: number;

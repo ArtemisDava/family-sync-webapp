@@ -30,7 +30,7 @@ interface UserForModal {
   _id: string;
   name: string;
   email: string;
-  deletedAt?: string;
+  deletedAt?: string | null;
   birthDate?: string;
   color?: string;
   phoneNumber?: string;
@@ -39,8 +39,12 @@ interface UserForModal {
 }
 
 export default function AdminDashboard() {
-  const [overviewStats, setOverviewStats] = useState<null | OverviewStats>(null);
-  const [usersWithFamilies, setUsersWithFamilies] = useState<UserFamilies[]>([]);
+  const [overviewStats, setOverviewStats] = useState<null | OverviewStats>(
+    null
+  );
+  const [usersWithFamilies, setUsersWithFamilies] = useState<UserFamilies[]>(
+    []
+  );
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [weeklyStats, setWeeklyStats] = useState<ChartDataPoint[]>([]);
@@ -55,14 +59,15 @@ export default function AdminDashboard() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [overview, users, weekly, monthly, frequency, allUsersList] = await Promise.all([
-        AdminService.getOverviewStats(),
-        AdminService.getUsersWithFamilies(),
-        AdminService.getNewUsersStats("week"),
-        AdminService.getNewUsersStats("month"),
-        AdminService.getFrequencyStats(),
-        AdminService.getAllUsers(),
-      ]);
+      const [overview, users, weekly, monthly, frequency, allUsersList] =
+        await Promise.all([
+          AdminService.getOverviewStats(),
+          AdminService.getUsersWithFamilies(),
+          AdminService.getNewUsersStats("week"),
+          AdminService.getNewUsersStats("month"),
+          AdminService.getFrequencyStats(),
+          AdminService.getAllUsers(),
+        ]);
 
       setOverviewStats(overview);
       setUsersWithFamilies(users);
@@ -87,9 +92,10 @@ export default function AdminDashboard() {
     setSearchTerm(term);
     if (!allUsers || allUsers.length === 0) return;
 
-    const filtered = allUsers.filter((user) =>
-      user.name.toLowerCase().includes(term.toLowerCase()) ||
-      user.email.toLowerCase().includes(term.toLowerCase())
+    const filtered = allUsers.filter(
+      (user) =>
+        user.name.toLowerCase().includes(term.toLowerCase()) ||
+        user.email.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredUsers(filtered);
   };
@@ -105,7 +111,9 @@ export default function AdminDashboard() {
   return (
     <>
       <section className="mx-auto w-full min-h-screen pb-20 max-w-6xl">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
+          Admin Dashboard
+        </h1>
 
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Widget type="user" amount={overviewStats.totalUsers} />
@@ -182,30 +190,68 @@ export default function AdminDashboard() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell className="font-bold text-gray-600">User Name</TableCell>
-                  <TableCell className="font-bold text-gray-600">Email</TableCell>
-                  <TableCell className="font-bold text-gray-600">Families</TableCell>
-                  <TableCell className="font-bold text-gray-600">Family Members</TableCell>
-                  <TableCell className="font-bold text-gray-600">Role</TableCell>
-                  <TableCell className="font-bold text-gray-600">Status</TableCell>
-                  <TableCell className="font-bold text-gray-600">Joined Date</TableCell>
-                  <TableCell className="font-bold text-gray-600">Actions</TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    User Name
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Email
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Families
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Family Members
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Role
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Status
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Joined Date
+                  </TableCell>
+                  <TableCell className="font-bold text-gray-600">
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <TableRow key={user._id} hover className={`transition-colors ${user.deletedAt ? 'opacity-60 bg-gray-50' : ''}`}>
-                      <TableCell className="font-medium text-gray-800">{user.name}</TableCell>
-                      <TableCell className="text-gray-600">{user.email}</TableCell>
+                    <TableRow
+                      key={user._id}
+                      hover
+                      className={`transition-colors ${
+                        user.deletedAt ? "opacity-60 bg-gray-50" : ""
+                      }`}
+                    >
+                      <TableCell className="font-medium text-gray-800">
+                        {user.name}
+                      </TableCell>
                       <TableCell className="text-gray-600">
-                        {user.families && user.families.length > 0
-                          ? <ul>{user.families.map((family: any) => (<li key={family._id}>{family.name}</li>))}</ul>
-                          : <p className="text-gray-400">No Families</p>}
+                        {user.email}
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {user.families && user.families.length > 0 ? (
+                          <ul>
+                            {user.families.map((family: any) => (
+                              <li key={family._id}>{family.name}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-gray-400">No Families</p>
+                        )}
                       </TableCell>
                       <TableCell className="text-gray-600">
                         {user.families && user.families.length > 0
-                          ? user.families.reduce((total: number, family: any) => total + (family.children ? family.children.length : 0) + (family.members ? family.members.length : 0), 0)
+                          ? user.families.reduce(
+                              (total: number, family: any) =>
+                                total +
+                                (family.children ? family.children.length : 0) +
+                                (family.members ? family.members.length : 0),
+                              0
+                            )
                           : "-"}
                       </TableCell>
                       <TableCell>
@@ -231,40 +277,54 @@ export default function AdminDashboard() {
                         )}
                       </TableCell>
                       <TableCell className="text-gray-600">
-                        {new Date(user.createdAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                        {new Date(user.createdAt).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          }
+                        )}
                       </TableCell>
                       <TableCell className="flex items-center gap-2">
-                        <Tooltip title={user.deletedAt ? "Enable User" : "Disable User"}>
+                        <Tooltip
+                          title={
+                            user.deletedAt ? "Enable User" : "Disable User"
+                          }
+                        >
                           <IconButton
                             size="small"
-                            onClick={() => setUserToDisable({
-                              _id: user._id,
-                              name: user.name,
-                              email: user.email,
-                              deletedAt: user.deletedAt,
-                            })}
+                            onClick={() =>
+                              setUserToDisable({
+                                _id: user._id,
+                                name: user.name,
+                                email: user.email,
+                                deletedAt: user.deletedAt,
+                              })
+                            }
                             color={user.deletedAt ? "success" : "error"}
                           >
-                            <IonIcon icon={user.deletedAt ? checkmarkCircle : ban} />
+                            <IonIcon
+                              icon={user.deletedAt ? checkmarkCircle : ban}
+                            />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={"Edit User"}>
                           <IconButton
                             size="small"
-                            onClick={() => setUserToEdit({
-                              _id: user._id,
-                              name: user.name,
-                              email: user.email,
-                              birthDate: user.birthDate,
-                              color: user.color,
-                              phoneNumber: user.phoneNumber,
-                              role: user.role,
-                              isAdmin: user.isAdmin,
-                            })}
+                            onClick={() =>
+                              setUserToEdit({
+                                _id: user._id,
+                                name: user.name,
+                                email: user.email,
+                                birthDate: user.birthDate,
+                                deletedAt: user.deletedAt,
+                                color: user.color,
+                                phoneNumber: user.phoneNumber,
+                                role: user.role,
+                                isAdmin: user.isAdmin,
+                              })
+                            }
                             color="primary"
                           >
                             <IonIcon
@@ -278,7 +338,11 @@ export default function AdminDashboard() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} align="center" className="py-8 text-gray-500">
+                    <TableCell
+                      colSpan={8}
+                      align="center"
+                      className="py-8 text-gray-500"
+                    >
                       No users found matching your search.
                     </TableCell>
                   </TableRow>

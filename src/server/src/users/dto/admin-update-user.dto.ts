@@ -28,6 +28,10 @@ export class AdminUpdateUserDto {
   @IsOptional()
   phoneNumber?: string;
 
+  @IsDateString()
+  @IsOptional()
+  deletedAt: Date | null;
+
   @IsEnum(['parent', 'child', 'relative'])
   @IsOptional()
   role?: string;

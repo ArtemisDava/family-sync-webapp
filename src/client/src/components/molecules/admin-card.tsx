@@ -24,24 +24,28 @@ const Widget = ({ type, amount, diff }: WidgetProps) => {
       link: "See all users",
       icon: personOutline,
       iconClass: "bg-red-500/20 text-red-600",
+      to: "#users",
     },
     family: {
       title: "FAMILIES",
       link: "View all families",
       icon: homeOutline,
       iconClass: "bg-yellow-500/20 text-yellow-600",
+      to: undefined,
     },
     admin: {
       title: "ADMINS",
       link: "View all admins",
       icon: constructOutline,
       iconClass: "bg-green-500/20 text-green-600",
+      to: undefined,
     },
     frequency: {
       title: "FREQUENCY",
       link: "See details",
       icon: statsChartOutline,
       iconClass: "bg-purple-500/20 text-purple-600",
+      to: undefined,
     },
   };
 
@@ -54,9 +58,11 @@ const Widget = ({ type, amount, diff }: WidgetProps) => {
       <div className="flex flex-col justify-between">
         <span className="font-bold text-sm text-gray-400">{data.title}</span>
         <span className="text-3xl font-light">{amount}</span>
-        <span className="w-max text-xs border-b border-gray-400 cursor-pointer hover:text-gray-600">
-          {data.link}
-        </span>
+        {data.to && (
+          <span className="w-max text-xs border-b border-gray-400 cursor-pointer hover:text-gray-600">
+            {data.link}
+          </span>
+        )}
       </div>
       <div className="flex flex-col justify-between items-end">
         <div
