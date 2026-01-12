@@ -54,7 +54,7 @@ export class CreateEventDto {
 
   @IsString()
   @IsOptional()
-  recurrencePattern?: string; // "daily", "weekly", "monthly"
+  recurrencePattern?: string;
 
   @IsDateString()
   @IsOptional()

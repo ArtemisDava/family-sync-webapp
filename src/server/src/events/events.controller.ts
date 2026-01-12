@@ -18,7 +18,6 @@ import { type AuthenticatedRequest } from '../auth-check/auth-check.middleware';
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
-  // fix with JWT and remove query userId?
   @Post()
   create(
     @Body() createEventDto: CreateEventDto,
@@ -27,8 +26,6 @@ export class EventsController {
     return this.eventsService.create(createEventDto, userId);
   }
 
-  // All events for a family
-  // if userId is provided, only show shared events or user's private events
   @Get('family/:familyId')
   findByFamily(
     @Param('familyId') familyId: string,
@@ -105,7 +102,6 @@ export class EventsController {
     return this.eventsService.update(id, updateEventDto, req.user.userId);
   }
 
-  //FIX ''"message": "You can only delete your own events",''
   @Delete(':id')
   remove(@Param('id') id: string, @Req() { user }: AuthenticatedRequest) {
     return this.eventsService.remove(id, user.userId);
