@@ -189,11 +189,10 @@ export default function Header() {
             {navLinks.map((link) => (
               <li key={link.name}>
                 <Button
-                  href={link.to}
+                  onClick={() => navigate(link.to)}
                   className={navLinksClasses}
                   variant="text"
                   color="inherit"
-                  onClick={toggleMenu}
                   sx={{
                     ":hover": {
                       fontWeight: "bold",
