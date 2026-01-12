@@ -156,8 +156,12 @@ export default function ProfilePage() {
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
-      const updateData: { name?: string; email?: string; password?: string; color?: string } =
-        {};
+      const updateData: {
+        name?: string;
+        email?: string;
+        password?: string;
+        color?: string;
+      } = {};
 
       if (name && name !== user?.name) {
         updateData.name = name;
@@ -179,8 +183,12 @@ export default function ProfilePage() {
         return;
       }
 
-      const updatedUser = await UserService.updateUser(updateData);
-      setUser(updatedUser);
+      const updatedUser = await UserService.updateUser(updateData, user);
+      setUser({
+        ...user,
+        ...updatedUser,
+        role: user?.role || updatedUser.role,
+      });
       alert("Settings saved successfully!");
       setPassword("");
     } catch (error) {
@@ -195,12 +203,8 @@ export default function ProfilePage() {
     <section className="text-black py-8 sm:py-2 lg:py-4 min-h-[80vh] max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
       <div className="w-full lg:max-w-[270px]">
         <div className="flex flex-col justify-between items-center mb-4 sm:mb-6 lg:mb-8 bg-white rounded-lg shadow-sm p-4 sm:p-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center">
-            {user?.name}
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600 mb-4">
-            {user?.email}
-          </p>
+          <h1 className="text-base font-bold text-center">{user?.name}</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mb-4">{user?.email}</p>
           <div className="w-full flex flex-col sm:flex-row lg:flex-col gap-2 overflow-x-auto">
             <Button
               variant={currentView === "settings" ? "contained" : "text"}
@@ -405,7 +409,7 @@ export default function ProfilePage() {
                   <h2 className="text-xl sm:text-2xl font-bold mb-4">
                     You are not part of any families yet.
                   </h2>
-                  <p className="text-sm sm:text-base text-gray-600 mb-4">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Create a new family to get started.
                   </p>
                   <Button
@@ -504,10 +508,11 @@ export default function ProfilePage() {
                       arrow
                     >
                       <button
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${copiedFamilyId === family._id
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          copiedFamilyId === family._id
                             ? "bg-green-100 text-green-700 border border-green-300"
                             : "text-[#0B6CEB] font-bold "
-                          }`}
+                        }`}
                         onClick={() => handleCopyInviteLink(family._id)}
                       >
                         {copiedFamilyId === family._id
@@ -872,8 +877,13 @@ export default function ProfilePage() {
                               loadInvitations();
                               loadFamilies();
                             } catch (error) {
-                              console.error("Error accepting invitation:", error);
-                              alert("Failed to accept invitation. Please try again.");
+                              console.error(
+                                "Error accepting invitation:",
+                                error
+                              );
+                              alert(
+                                "Failed to accept invitation. Please try again."
+                              );
                             }
                           }}
                           sx={{ fontWeight: "bold", fontSize: "12px" }}
@@ -893,8 +903,13 @@ export default function ProfilePage() {
                               );
                               loadInvitations();
                             } catch (error) {
-                              console.error("Error rejecting invitation:", error);
-                              alert("Failed to reject invitation. Please try again.");
+                              console.error(
+                                "Error rejecting invitation:",
+                                error
+                              );
+                              alert(
+                                "Failed to reject invitation. Please try again."
+                              );
                             }
                           }}
                           sx={{ fontWeight: "bold", fontSize: "12px" }}
