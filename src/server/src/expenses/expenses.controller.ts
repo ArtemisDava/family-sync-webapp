@@ -62,7 +62,6 @@ export class ExpensesController {
     return this.expensesService.update(id, updateExpenseDto, userId);
   }
 
-  //TODO: FIX "You can only delete expenses you created"
   @Delete(':id')
   remove(@Param('id') id: string, @Query('userId') userId: string) {
     return this.expensesService.remove(id, userId);

@@ -12,7 +12,6 @@ import { Family, FamilyDocument } from '../families/entities/family.entity';
 import { Child, ChildDocument } from '../children/entities/child.entity';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
-import { share } from 'rxjs';
 
 @Injectable()
 export class ExpensesService {
@@ -191,7 +190,6 @@ export class ExpensesService {
     return updatedExpense!;
   }
 
-  // fix
   async remove(id: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid expense ID');

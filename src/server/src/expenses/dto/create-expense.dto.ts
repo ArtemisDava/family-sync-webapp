@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsMongoId,
   IsEnum,
-  IsBoolean,
   IsArray,
   Min,
 } from 'class-validator';
