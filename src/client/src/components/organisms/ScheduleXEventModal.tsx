@@ -12,6 +12,11 @@ interface ScheduleXCalendarEvent {
   originalEvent?: CalendarEvent & {
     _id?: string;
     location?: string;
+    createdBy?: {
+      _id: string;
+      name: string;
+      email: string;
+    };
     notes?: string | string[];
     family?: string | { _id: string; name: string };
     familyName?: string;
@@ -125,6 +130,14 @@ export function ScheduleXEventModal({
         </h3>
       </div>
 
+{originalEvent?.createdBy && (
+            <div className="mb-4">
+        <h3 className="text-lg font-bold text-gray-900">
+          {originalEvent.createdBy.name}
+        </h3>
+      </div>
+)}
+
       <div className="space-y-3 text-sm">
         <div>
           <span className="font-semibold text-gray-700">📅 Date & Time:</span>
@@ -150,12 +163,14 @@ export function ScheduleXEventModal({
           <p className="text-gray-600 ml-5">{getFamilyName()}</p>
         </div>
 
-        <div>
-          <span className="font-semibold text-gray-700">📝 Notes:</span>
-          <p className="text-gray-600 ml-5">
-            {formatNotes(originalEvent?.notes)}
-          </p>
-        </div>
+        {originalEvent?.notes && (
+          <div>
+            <span className="font-semibold text-gray-700">📝 Notes:</span>
+            <p className="text-gray-600 ml-5">
+              {formatNotes(originalEvent?.notes)}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end gap-2">
