@@ -4,7 +4,7 @@ import { AboutUseCases } from "../components/molecules/use-cases";
 export default function About() {
   return (
     <>
-      <section className="bg-card max-w-6xl mx-auto px-4 sm:px-0">
+      <section className="bg-card max-w-6xl mx-auto px-4 lg:px-0">
         <div className="mx-auto max-w-7xl ">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
