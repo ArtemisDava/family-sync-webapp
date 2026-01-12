@@ -38,14 +38,17 @@ export const UserService = {
     if (!result.ok) {
       const errorResponse = await result.json();
       console.log("Login failed with status:", result);
-      throw new Error(errorResponse.message || "Login failed" );
+      throw new Error(errorResponse.message || "Login failed");
     }
     const resultData: LoginInformation = await result.json();
 
     return resultData;
   },
 
-  async updateUser(user: Partial<EditableUserFields>) {
+  async updateUser(
+    user: Partial<EditableUserFields>,
+    oldUser: LoginInformation | null
+  ) {
     try {
       const result = await fetch(`${API_DOMAIN}/api/users`, {
         method: "PATCH",
@@ -62,7 +65,14 @@ export const UserService = {
       const userResponse = await result.json();
       userResponse.userId = userResponse._id;
 
-      localStorage.setItem("user", JSON.stringify(userResponse));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...oldUser,
+          ...userResponse,
+          role: oldUser?.role || userResponse.role,
+        })
+      );
 
       return userResponse;
     } catch (error) {
@@ -102,7 +112,7 @@ export const UserService = {
 
   async searchUsers(
     name: string,
-    token?: string,
+    token?: string
   ): Promise<{ _id: string; name: string; email: string }[]> {
     try {
       const result = await fetch(
@@ -113,7 +123,7 @@ export const UserService = {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-        },
+        }
       );
       if (!result.ok) {
         throw new Error("Failed to search users");

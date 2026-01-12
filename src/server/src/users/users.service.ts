@@ -112,7 +112,10 @@ export class UsersService {
 
   async searchByName(name: string): Promise<User[]> {
     return this.userModel
-      .find({ name: { $regex: name, $options: 'i' } })
+      .find({
+        name: { $regex: name, $options: 'i' },
+        deletedAt: { $exists: false },
+      })
       .select('-password')
       .limit(10)
       .exec();
@@ -147,7 +150,6 @@ export class UsersService {
     id: string,
     adminUpdateUserDto: AdminUpdateUserDto,
   ): Promise<User> {
-    // Check if email is being changed and if it already exists
     if (adminUpdateUserDto.email) {
       const existingUser = await this.userModel.findOne({
         email: adminUpdateUserDto.email,
