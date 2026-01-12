@@ -23,6 +23,9 @@ export class Event {
   @Prop({ type: Types.ObjectId, ref: 'Child' })
   child?: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  adult?: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 

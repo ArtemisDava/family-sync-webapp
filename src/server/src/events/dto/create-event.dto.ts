@@ -77,6 +77,11 @@ export class CreateEventDto {
   @IsOptional()
   color?: string;
 
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  notes?: string[];
+
   @IsBoolean()
   @IsOptional()
   isAllDay?: boolean;
