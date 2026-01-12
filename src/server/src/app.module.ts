@@ -13,6 +13,7 @@ import { ChildrenModule } from './children/children.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { ConnectionLogsModule } from './connection_logs/connection_logs.module';
+import { FamilyInvitationModule } from './family-invitation/family-invitation.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ConnectionLogsModule } from './connection_logs/connection_logs.module';
     AuthModule,
     AdminModule,
     ConnectionLogsModule,
+    FamilyInvitationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
