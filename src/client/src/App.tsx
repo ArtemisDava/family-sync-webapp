@@ -10,7 +10,6 @@ import ScheduleXPage from "./pages/schedule-x";
 import AdminDashboard from "./pages/admin-dashboard";
 import { ModalProvider } from "./contexts/modal.context";
 import { useUser } from "./contexts/user.context";
-import AdminDashboardPreview from "./pages/admin-dashboard-preview";
 import About from "./pages/about";
 
 function App() {
@@ -43,7 +42,6 @@ function ProtectedRoutes() {
   return (
     <Routes>
       <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/preview" element={<AdminDashboardPreview />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/schedules" element={<ScheduleXPage />} />
     </Routes>
