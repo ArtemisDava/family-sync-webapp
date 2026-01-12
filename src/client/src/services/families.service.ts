@@ -3,6 +3,17 @@ import { type Family } from "../models/event";
 export const API_DOMAIN =
   import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+const STORAGE_KEY_FAMILIES = 'familySync_families';
+
+const saveFamiliesToStorage = (families: Family[]) => {
+  localStorage.setItem(STORAGE_KEY_FAMILIES, JSON.stringify(families));
+};
+
+const loadFamiliesFromStorage = (): Family[] => {
+  const stored = localStorage.getItem(STORAGE_KEY_FAMILIES);
+  return stored ? JSON.parse(stored) : [];
+};
+
 export const FamiliesService = {
   async createFamily(name: string, token?: string) {
     try {
@@ -25,22 +36,28 @@ export const FamiliesService = {
   },
 
   async getFamilies(token?: string): Promise<Family[]> {
-    try {
-      const response = await fetch(`${API_DOMAIN}/api/families/by-user`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch families");
+    const cachedFamilies = loadFamiliesFromStorage();
+
+    if (navigator.onLine) {
+      try {
+        const response = await fetch(`${API_DOMAIN}/api/families/by-user`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (response.ok) {
+          const serverFamilies = await response.json();
+          saveFamiliesToStorage(serverFamilies);
+          return serverFamilies; // Return fresh data
+        }
+      } catch (error) {
+        console.error("Error syncing families:", error);
       }
-      return response.json();
-    } catch (error) {
-      console.error("Error fetching families:", error);
-      throw error;
     }
+
+    return cachedFamilies;
   },
 
   async getFamilyById(id: string, token?: string) {

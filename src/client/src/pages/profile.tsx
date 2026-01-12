@@ -58,6 +58,7 @@ export default function ProfilePage() {
       respondedAt?: string;
     }[]
   >([]);
+  const [error, setError] = useState<string | null>(null);
 
   const loadFamilies = useCallback(async () => {
     if (token) {
@@ -68,10 +69,11 @@ export default function ProfilePage() {
           token
         );
         setFamilies(fetchedFamilies);
-        setLoading(false);
         setChildren(children);
       } catch (error) {
         console.error("Error fetching families:", error);
+      } finally {
+        setLoading(false);
       }
     }
   }, [token, user?.userId]);
@@ -198,8 +200,10 @@ export default function ProfilePage() {
       alert("Settings saved successfully!");
       setPassword("");
     } catch (error) {
-      console.error("Error saving settings:", error);
-      alert("Failed to save settings. Please try again.");
+      if (error instanceof Error){
+        const message = error.message[0].toUpperCase() + error.message.slice(1);
+        setError(message);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -335,6 +339,11 @@ export default function ProfilePage() {
                   placeholder="Leave blank to keep current password"
                 />
               </div>
+
+              {error && (<>
+                <div className="text-red-600 font-semibold">{error}</div>
+              </>)}
+
 
               <div className="flex flex-row gap-5">
                 <Button
