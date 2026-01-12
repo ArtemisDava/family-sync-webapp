@@ -21,7 +21,6 @@ import { Roles, RolesGuard } from '../auth/role.guard';
 export class FamiliesController {
   constructor(private readonly familiesService: FamiliesService) {}
 
-  // only for admin
   @Get()
   @Roles('admin')
   findAll() {
@@ -33,7 +32,6 @@ export class FamiliesController {
     return this.familiesService.findByUserId(req.user?.userId);
   }
 
-  // only parent/guardian or admin everything below
   @Post()
   create(
     @Body() createFamilyDto: CreateFamilyDto,
@@ -52,7 +50,6 @@ export class FamiliesController {
     return this.familiesService.update(id, updateFamilyDto);
   }
 
-  // only admins and parents can add/remove members
   @Post(':id/members')
   addMember(@Param('id') id: string, @Body() addMemberDto: AddMemberDto) {
     return this.familiesService.addMember(id, addMemberDto.userId);
@@ -78,7 +75,6 @@ export class FamiliesController {
     return this.familiesService.removeChild(familyId, childId, req.userRole!);
   }
 
-  // delete account only for admins and users themselves
   @Delete(':id')
   @Roles()
   remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
