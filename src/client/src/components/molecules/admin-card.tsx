@@ -24,7 +24,6 @@ const Widget = ({ type, amount, diff }: WidgetProps) => {
       link: "See all users",
       icon: personOutline,
       iconClass: "bg-red-500/20 text-red-600",
-      to: "#users",
     },
     family: {
       title: "FAMILIES",
@@ -51,32 +50,13 @@ const Widget = ({ type, amount, diff }: WidgetProps) => {
 
   const data = widgetConfig[type];
 
-  const isPositive = diff ?? 0 >= 0;
-
   return (
     <Card className="h-[100px] bg-white">
       <div className="flex flex-col justify-between">
         <span className="font-bold text-sm text-gray-400">{data.title}</span>
         <span className="text-3xl font-light">{amount}</span>
-        {data.to && (
-          <span className="w-max text-xs border-b border-gray-400 cursor-pointer hover:text-gray-600">
-            {data.link}
-          </span>
-        )}
       </div>
       <div className="flex flex-col justify-between items-end">
-        <div
-          className={`flex items-center text-sm ${
-            isPositive ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {diff && (
-            <>
-              <IonIcon icon={isPositive ? arrowUp : arrowDown} />
-              <p>{Math.abs(diff)} %</p>
-            </>
-          )}
-        </div>
         <IonIcon
           icon={data.icon}
           className={`text-lg p-1.5 rounded-md ${data.iconClass}`}
