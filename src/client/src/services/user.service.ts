@@ -36,7 +36,9 @@ export const UserService = {
     });
 
     if (!result.ok) {
-      throw new Error("Login failed");
+      const errorResponse = await result.json();
+      console.log("Login failed with status:", result);
+      throw new Error(errorResponse.message || "Login failed" );
     }
     const resultData: LoginInformation = await result.json();
 
