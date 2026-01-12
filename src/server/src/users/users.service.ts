@@ -28,12 +28,7 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    const user = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword,
-    });
+    const user = new this.userModel(createUserDto);
 
     const savedUser = await user.save();
 
@@ -84,15 +79,20 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .select('-password')
-      .exec();
+    const user = await this.userModel.findById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+
+    Object.assign(user, updateUserDto);
+
+    await user.save();
+
+    const result = user.toObject();
+    delete result.password;
+
+    return result as User;
   }
 
   async remove(id: string): Promise<void> {
@@ -129,12 +129,7 @@ export class UsersService {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(adminCreateUserDto.password, 10);
-
-    const user = new this.userModel({
-      ...adminCreateUserDto,
-      password: hashedPassword,
-    });
+    const user = new this.userModel(AdminCreateUserDto);
 
     const savedUser = await user.save();
 
