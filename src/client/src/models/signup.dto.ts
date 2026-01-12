@@ -4,4 +4,5 @@ export interface SignUpDto {
   name: string;
   birthDate: string;
   color: string;
+  invite?: string;
 }
