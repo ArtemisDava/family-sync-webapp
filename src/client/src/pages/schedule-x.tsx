@@ -67,7 +67,6 @@ function SchedulePageSkeleton() {
                   className="bg-white min-h-20 p-2"
                 >
                   <Skeleton variant="text" width={20} height={20} />
-                  {/* Random event skeletons */}
                   {Math.random() > 0.7 && (
                     <Skeleton
                       variant="rounded"
@@ -280,15 +279,27 @@ export default function ScheduleXPage() {
     });
   }, [families, children, invokeCreateEventModal, refetch, user]);
 
+  const membersColorsMap = useMemo(() => {
+    if (!families) return new Map<string, string>();
+    const map = new Map<string, string>();
+    families.forEach((family) => {
+      family.members.forEach((member) => {
+        map.set(member._id, member.color || "");
+      });
+    });
+    return map;
+  }, [families]);
+
   const filteredEvents = useMemo(
     () =>
       transformToCalendarEvents(
         eventsByChild,
         children,
         disabledChildren,
-        user
+        user,
+        membersColorsMap
       ),
-    [eventsByChild, children, disabledChildren, user]
+    [eventsByChild, children, disabledChildren, user, membersColorsMap]
   );
 
   const { calendars, childToCalendarId } = useMemo(
@@ -297,8 +308,8 @@ export default function ScheduleXPage() {
   );
 
   const scheduleXEvents = useMemo(
-    () => toScheduleXFormat(filteredEvents, childToCalendarId),
-    [filteredEvents, childToCalendarId]
+    () => toScheduleXFormat(filteredEvents),
+    [filteredEvents]
   );
 
   const eventsServicePlugin = useMemo(() => createEventsServicePlugin(), []);
@@ -400,8 +411,8 @@ export default function ScheduleXPage() {
 
   const calendar = useCalendarApp({
     views: [
-      createViewDay(),
-      createViewWeek(),
+      // createViewDay(),
+      // createViewWeek(),
       createViewMonthGrid(),
       createViewMonthAgenda(),
       createViewList(),
@@ -446,7 +457,7 @@ export default function ScheduleXPage() {
 
   if (!families || families.length === 0) {
     return (
-      <section className="p-4 px-20 container mx-auto">
+      <section className="max-w-6xl mx-auto text-center">
         <p>No families found. Please create a family to manage schedules.</p>
       </section>
     );
@@ -485,7 +496,6 @@ export default function ScheduleXPage() {
             families={families}
             disabledChildren={disabledChildren}
             onToggleChild={toggleChildCalendar}
-            user={user}
           />
         </div>
       </div>
