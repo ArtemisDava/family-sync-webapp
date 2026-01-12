@@ -9,10 +9,16 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminCreateUserDto } from './dto/admin-create-user.dto';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
+import { FamilyInvitationService } from 'src/family-invitation/family-invitation.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly familyInvitationService: FamilyInvitationService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userModel.findOne({
@@ -31,6 +37,24 @@ export class UsersService {
 
     const savedUser = await user.save();
 
+    if (createUserDto.invite) {
+      try {
+        const [familyId, invitedByUserId] = createUserDto.invite.split('-');
+        if (familyId && invitedByUserId) {
+          const invitation = await this.familyInvitationService.create(
+            {
+              familyId,
+              invitedUser: savedUser._id.toString(),
+            },
+            invitedByUserId,
+          );
+          await this.familyInvitationService.accept(invitation._id.toString());
+        }
+      } catch (error) {
+        console.error('Error processing invitation during signup:', error);
+      }
+    }
+
     return savedUser.toObject({
       transform: (doc, ret: Partial<UserDocument>) => {
         delete ret.password;
@@ -40,7 +64,11 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().select('-password').exec();
+    return this.userModel
+      .find()
+      .select('-password')
+      .populate('families')
+      .exec();
   }
 
   async findOne(id: string): Promise<User | null> {
@@ -88,5 +116,80 @@ export class UsersService {
       .select('-password')
       .limit(10)
       .exec();
+  }
+
+  async adminCreateUser(adminCreateUserDto: AdminCreateUserDto): Promise<User> {
+    const existingUser = await this.userModel.findOne({
+      email: adminCreateUserDto.email,
+    });
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(adminCreateUserDto.password, 10);
+
+    const user = new this.userModel({
+      ...adminCreateUserDto,
+      password: hashedPassword,
+    });
+
+    const savedUser = await user.save();
+
+    return savedUser.toObject({
+      transform: (doc, ret: Partial<UserDocument>) => {
+        delete ret.password;
+        return ret;
+      },
+    });
+  }
+
+  async adminUpdateUser(
+    id: string,
+    adminUpdateUserDto: AdminUpdateUserDto,
+  ): Promise<User> {
+    // Check if email is being changed and if it already exists
+    if (adminUpdateUserDto.email) {
+      const existingUser = await this.userModel.findOne({
+        email: adminUpdateUserDto.email,
+        _id: { $ne: id },
+      });
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    const user = await this.userModel
+      .findByIdAndUpdate(id, adminUpdateUserDto, { new: true })
+      .select('-password')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async disableUser(id: string): Promise<User> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true })
+      .select('-password')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async enableUser(id: string): Promise<User> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, { $unset: { deletedAt: 1 } }, { new: true })
+      .select('-password')
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
