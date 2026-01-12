@@ -114,7 +114,7 @@ export class UsersService {
     return this.userModel
       .find({
         name: { $regex: name, $options: 'i' },
-        deletedAt: { $exists: false },
+        deletedAt: null,
       })
       .select('-password')
       .limit(10)
