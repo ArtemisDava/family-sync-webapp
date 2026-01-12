@@ -48,4 +48,22 @@ export class AdminController {
   getOverviewStats() {
     return this.adminService.getOverviewStats();
   }
+
+  @Get('stats/users-with-families')
+  @Roles('admin')
+  getUsersWithFamilies() {
+    return this.adminService.getUsersWithFamilies();
+  }
+
+  @Get('stats/new-users/:interval')
+  @Roles('admin')
+  getNewUsersStats(@Param('interval') interval: 'week' | 'month') {
+    return this.adminService.getNewUsersStats(interval);
+  }
+
+  @Get('stats/frequency')
+  @Roles('admin')
+  getFrequencyStats() {
+    return this.adminService.getFrequencyStats();
+  }
 }

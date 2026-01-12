@@ -15,6 +15,12 @@ import {
   ConnectionLogSchema,
 } from 'src/connection_logs/entities/connection_log.entity';
 import { ConnectionLogsService } from 'src/connection_logs/connection_logs.service';
+import { FamilyInvitationService } from '../family-invitation/family-invitation.service';
+import {
+  FamilyInvitation,
+  FamilyInvitationSchema,
+} from '../family-invitation/entities/family-invitation.entity';
+import { Event, EventSchema } from '../events/entities/event.entity';
 
 @Module({
   imports: [
@@ -25,6 +31,8 @@ import { ConnectionLogsService } from 'src/connection_logs/connection_logs.servi
       { name: Family.name, schema: FamilySchema },
       { name: User.name, schema: UserSchema },
       { name: ConnectionLog.name, schema: ConnectionLogSchema },
+      { name: FamilyInvitation.name, schema: FamilyInvitationSchema },
+      { name: Event.name, schema: EventSchema },
     ]),
   ],
   controllers: [AdminController],
@@ -33,6 +41,7 @@ import { ConnectionLogsService } from 'src/connection_logs/connection_logs.servi
     UsersService,
     FamiliesService,
     ConnectionLogsService,
+    FamilyInvitationService,
   ],
 })
 export class AdminModule {
