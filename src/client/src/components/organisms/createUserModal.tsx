@@ -177,12 +177,9 @@ export default function CreateUserModal({
           <CustomSelect
             name="role"
             value={role}
-            onChange={(value) =>
-              setRole(value as "parent" | "child" | "relative")
-            }
+            onChange={(value) => setRole(value as "parent" | "relative")}
             options={[
               { value: "parent", label: "Parent" },
-              { value: "child", label: "Child" },
               { value: "relative", label: "Relative" },
             ]}
           />

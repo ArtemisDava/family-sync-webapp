@@ -47,7 +47,7 @@ export default function EditUserModal({
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDeleted, setIsDeleted] = useState(user?.deletedAt ? true : false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -57,7 +57,6 @@ export default function EditUserModal({
       setColor(user.color || "#3b82f6");
       setRole(user.role || "parent");
       setIsAdmin(user.isAdmin || false);
-      setIsDeleted(user.deletedAt ? true : false);
     }
   }, [user]);
 
@@ -67,6 +66,23 @@ export default function EditUserModal({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (isDeleted) {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to mark this user as deleted? This action cannot be undone."
+      );
+      if (!confirmDelete) {
+        setIsLoading(false);
+        return;
+      }
+      await AdminService.deleteUser(user._id);
+      if (onUserUpdated) {
+        await Promise.resolve(onUserUpdated());
+      }
+      setIsLoading(false);
+      onClose();
+      return;
+    }
 
     try {
       const data: AdminUpdateUserDto = {
@@ -188,12 +204,9 @@ export default function EditUserModal({
           <CustomSelect
             name="editRole"
             value={role}
-            onChange={(value) =>
-              setRole(value as "parent" | "child" | "relative")
-            }
+            onChange={(value) => setRole(value as "parent" | "relative")}
             options={[
               { value: "parent", label: "Parent" },
-              { value: "child", label: "Child" },
               { value: "relative", label: "Relative" },
             ]}
           />
