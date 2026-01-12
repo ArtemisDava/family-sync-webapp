@@ -185,7 +185,7 @@ export default function Header() {
         </div>
 
         {showMenu && (
-          <ul className="lg:flex lg:items-center bg-white z-10 lg:z-auto lg:static absolute  w-full left-0 lg:w-auto lg:py-0 py-4 lg:pl-0 pl-4 top-[70px] transition-all ease-in duration-200">
+          <ul className="lg:flex lg:items-center bg-white z-10 lg:z-auto lg:static absolute  w-full left-0 lg:w-auto lg:py-0 py-4 lg:pl-0 pl-4 top-[70px] transition-all ease-in duration-200 gap-5">
             {navLinks.map((link) => (
               <li key={link.name}>
                 <Button
