@@ -33,6 +33,12 @@ export class User {
 
   @Prop({ default: false })
   isAdmin: boolean;
+
+  @Prop()
+  deletedAt?: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

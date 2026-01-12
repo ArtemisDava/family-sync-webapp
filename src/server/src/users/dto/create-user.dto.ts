@@ -34,6 +34,10 @@ export class CreateUserDto {
   @IsOptional()
   phoneNumber?: string;
 
+  @IsString()
+  @IsOptional()
+  invite?: string;
+
   @IsEnum(['parent', 'child', 'relative'])
   @IsOptional()
   role?: string;
