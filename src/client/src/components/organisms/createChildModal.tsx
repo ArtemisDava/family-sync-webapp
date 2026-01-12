@@ -50,7 +50,6 @@ export default function CreateChildModal({
         await Promise.resolve(open.onChildCreated());
       }
 
-      // Reset form
       setName("");
       setFamilyId("");
       setBirthDate("");

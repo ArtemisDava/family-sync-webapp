@@ -77,7 +77,7 @@ interface Child {
   birthDate: string;
   color?: string;
   family: string;
-  guardians?: string[];
+  guardians?: (string | { _id: string; name: string })[];
 }
 
 interface EditChildModalProps {
@@ -102,7 +102,10 @@ export default function EditChildModal({ open, onClose }: EditChildModalProps) {
       setName(open.child.name);
       setBirthDate(open.child.birthDate?.split("T")[0] || "");
       setColor(open.child.color || "#3b82f6");
-      setGuardians(open.child.guardians || []);
+      const guardianIds = (open.child.guardians || []).map((guardian) =>
+        typeof guardian === "string" ? guardian : guardian?._id || "",
+      );
+      setGuardians(guardianIds.filter((id) => id !== ""));
     }
   }, [open]);
 
