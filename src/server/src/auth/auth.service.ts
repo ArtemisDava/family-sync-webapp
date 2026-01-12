@@ -21,7 +21,7 @@ export class AuthService {
     return this.usersService.create(value);
   }
   async login(loginDTO: LoginDTO, req: Request): Promise<LoginResponse> {
-    let user = await this.usersService.findByEmail(loginDTO.email);
+    const user = await this.usersService.findByEmail(loginDTO.email);
 
     const isPasswordValid = user
       ? await bcrypt.compare(loginDTO.password, user.password || '')
@@ -29,6 +29,10 @@ export class AuthService {
 
     if (!user || !isPasswordValid) {
       throw new BadRequestException('Invalid credentials');
+    }
+
+    if (user.deletedAt) {
+      throw new BadRequestException('User account is deleted');
     }
 
     const payload: JwtPayload = {
