@@ -1,6 +1,8 @@
 import { useState } from "react";
 import BaseModal from "../atoms/base-modal";
 import { CustomSelect } from "../atoms/CustomSelect";
+import { InvitationService } from "../../services/invitation.service";
+import { useUser } from "../../contexts/user.context";
 
 interface InviteUserModalProps {
   open: {
@@ -14,11 +16,25 @@ export default function InviteUserModal({
   open,
   onClose,
 }: InviteUserModalProps) {
+  const { token } = useUser();
   const [selectedFamily, setSelectedFamily] = useState<string>(
     open.families[0]?._id || "",
   );
 
-  const handleSendInvite = () => {
+  const handleSendInvite = async () => {
+    console.log("Sending invite to", open.user, "for family", selectedFamily);
+    if (!token) return;
+
+    try {
+      await InvitationService.createInvitation({
+        familyId: selectedFamily,
+        invitedUser: open.user._id,
+      }, token)
+
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+    }
+
     onClose();
   };
 
@@ -31,17 +47,17 @@ export default function InviteUserModal({
             name="family"
             value={selectedFamily}
             onChange={(value) => {
-            setSelectedFamily(value);
+              setSelectedFamily(value);
             }}
             required
             placeholder="Select a family"
             options={
-            open.families.map((family) => ({
+              open.families.map((family) => ({
                 value: family._id,
                 label: family.name,
-            })) || []
+              })) || []
             }
-        />
+          />
         </div>
 
         <p className="text-center text-gray-700">
