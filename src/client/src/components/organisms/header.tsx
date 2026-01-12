@@ -15,7 +15,7 @@ const navLinks = [
   { name: "ABOUT", to: "/about" },
 ];
 
-const useMediaQuery = (query: string) => {
+export const useMediaQuery = (query: string) => {
   const [matches, setMatches] = useState(
     () => window.matchMedia(query).matches
   );
@@ -161,7 +161,10 @@ export default function Header() {
 
   const navLinksClasses = "text-base hover:text-[#6DBE45] duration-200";
 
-  if ((location.pathname === "/login" && !isMobile) || (location.pathname === "/signup" && !isMobile)) {
+  if (
+    (location.pathname === "/login" && !isMobile) ||
+    (location.pathname === "/signup" && !isMobile)
+  ) {
     return null;
   }
 
