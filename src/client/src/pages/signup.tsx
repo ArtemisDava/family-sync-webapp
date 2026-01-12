@@ -52,9 +52,9 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center lg:gap-6  min-h-[86vh] lg:p-0 mx-auto lg:max-w-[72rem] flex-col lg:flex-row">
+    <div className="flex items-center justify-center lg:gap-6  min-h-[86vh] lg:p-0 mx-auto lg:max-w-[72rem] flex-col lg:flex-row min-h-screen">
       <div className="mb-6 bg-logo2 max-w-sm min-w-xs lg:w-1/2 lg:max-w-none min-h-60 lg:min-h-[86vh] flex items-center justify-center">
-        <h1 className="text-3xl font-bold mt-12">Family-Sync</h1>
+        <h1 className="text-6xl mt-12 italic">Family-Sync</h1>
       </div>
       <div className="w-full lg:w-1/2 p-6">
         <button
@@ -67,7 +67,7 @@ export default function SignupPage() {
         <h1 className="text-2xl font-bold mb-2">Create an account</h1>
 
         <form
-          className="flex flex-col w-full my-8 lg:my-20
+          className="flex flex-col w-full my-8 lg:my-16
           text-start  gap-2 lg:gap-4 mb-4 text-base font-normal"
           onSubmit={handleSubmit}
         >
@@ -155,11 +155,11 @@ export default function SignupPage() {
             <Button
               variant="contained"
               size="small"
-              color="inherit"
+              color="secondary"
               type="submit"
               sx={{ px: 4, py: 0.5 }}
             >
-              Sign up
+              Create account
             </Button>
           </div>
           <div className="w-full flex flex-col items-center gap-2 mt-4">

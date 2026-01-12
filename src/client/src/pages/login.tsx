@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center lg:gap-6  min-h-[86vh] lg:p-0 mx-auto lg:max-w-[72rem] flex-col lg:flex-row">
+    <div className="flex items-center justify-center lg:gap-6  min-h-[86vh] lg:p-0 mx-auto lg:max-w-[72rem] flex-col lg:flex-row  min-h-screen">
       <div className="mb-6 bg-logo2 max-w-sm min-w-xs lg:w-1/2 lg:max-w-none min-h-60 lg:min-h-[86vh] flex items-center justify-center">
         <h1 className="text-6xl mt-12 italic">Family-Sync</h1>
       </div>
