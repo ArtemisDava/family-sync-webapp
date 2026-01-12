@@ -60,7 +60,8 @@ export const UserService = {
       });
 
       if (!result.ok) {
-        throw new Error("Failed to update user");
+        const response = await result.json();
+        throw new Error(`${response.message}`);
       }
       const userResponse = await result.json();
       userResponse.userId = userResponse._id;
