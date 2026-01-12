@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import BaseModal from "../atoms/base-modal";
-import { FormControl, InputLabel, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import Button from "@mui/material/Button";
-import { AdminService, type AdminUpdateUserDto } from "../../services/admin.service";
+import {
+  AdminService,
+  type AdminUpdateUserDto,
+} from "../../services/admin.service";
 import { BootstrapInput } from "./editChildModal";
 import { CustomSelect } from "../atoms/CustomSelect";
 
@@ -13,6 +21,7 @@ interface UserToEdit {
   birthDate?: string;
   color?: string;
   phoneNumber?: string;
+  deletedAt?: Date;
   role?: "parent" | "child" | "relative";
   isAdmin?: boolean;
 }
@@ -34,11 +43,11 @@ export default function EditUserModal({
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [color, setColor] = useState("#3b82f6");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState<"parent" | "child" | "relative">("parent");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleted, setIsDeleted] = useState(user?.deletedAt ? true : false);
 
   useEffect(() => {
     if (user) {
@@ -46,9 +55,9 @@ export default function EditUserModal({
       setName(user.name || "");
       setBirthDate(user.birthDate ? user.birthDate.split("T")[0] : "");
       setColor(user.color || "#3b82f6");
-      setPhoneNumber(user.phoneNumber || "");
       setRole(user.role || "parent");
       setIsAdmin(user.isAdmin || false);
+      setIsDeleted(user.deletedAt ? true : false);
     }
   }, [user]);
 
@@ -65,9 +74,9 @@ export default function EditUserModal({
         name,
         birthDate,
         color,
-        phoneNumber: phoneNumber || undefined,
         role,
         isAdmin,
+        deletedAt: isDeleted ? new Date() : null,
       };
 
       await AdminService.updateUser(user._id, data);
@@ -79,7 +88,11 @@ export default function EditUserModal({
       onClose();
     } catch (err) {
       console.error("Error updating user:", err);
-      setError(err instanceof Error ? err.message : "Error updating user. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error updating user. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +110,11 @@ export default function EditUserModal({
         </div>
 
         <FormControl variant="standard" required>
-          <InputLabel shrink className="text-xl font-bold" htmlFor="editUserName">
+          <InputLabel
+            shrink
+            className="text-xl font-bold"
+            htmlFor="editUserName"
+          >
             Name
           </InputLabel>
           <BootstrapInput
@@ -111,7 +128,11 @@ export default function EditUserModal({
         </FormControl>
 
         <FormControl variant="standard" required>
-          <InputLabel shrink className="text-xl font-bold" htmlFor="editUserEmail">
+          <InputLabel
+            shrink
+            className="text-xl font-bold"
+            htmlFor="editUserEmail"
+          >
             Email
           </InputLabel>
           <BootstrapInput
@@ -124,21 +145,12 @@ export default function EditUserModal({
           />
         </FormControl>
 
-        <FormControl variant="standard">
-          <InputLabel shrink className="text-xl font-bold" htmlFor="editUserPhone">
-            Phone Number
-          </InputLabel>
-          <BootstrapInput
-            type="tel"
-            value={phoneNumber}
-            name="editUserPhone"
-            id="editUserPhone"
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-        </FormControl>
-
         <FormControl variant="standard" required>
-          <InputLabel shrink className="text-xl font-bold" htmlFor="editUserBirthDate">
+          <InputLabel
+            shrink
+            className="text-xl font-bold"
+            htmlFor="editUserBirthDate"
+          >
             Birth Date
           </InputLabel>
           <BootstrapInput
@@ -158,7 +170,7 @@ export default function EditUserModal({
             sx={{ position: "relative" }}
             htmlFor="editUserColor"
           >
-            Favorite Color
+            Theme Color
           </InputLabel>
           <BootstrapInput
             type="color"
@@ -176,7 +188,9 @@ export default function EditUserModal({
           <CustomSelect
             name="editRole"
             value={role}
-            onChange={(value) => setRole(value as "parent" | "child" | "relative")}
+            onChange={(value) =>
+              setRole(value as "parent" | "child" | "relative")
+            }
             options={[
               { value: "parent", label: "Parent" },
               { value: "child", label: "Child" },
@@ -195,6 +209,24 @@ export default function EditUserModal({
           }
           label="Admin privileges"
         />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isDeleted}
+              onChange={(e) => setIsDeleted(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Mark as Deleted"
+        />
+
+        {isDeleted && (
+          <p className="text-sm text-red-600">
+            This user will be marked as deleted and will not be able to access
+            their account.
+          </p>
+        )}
 
         {error && (
           <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded">
