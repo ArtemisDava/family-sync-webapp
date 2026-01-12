@@ -103,7 +103,7 @@ export default function EditChildModal({ open, onClose }: EditChildModalProps) {
       setBirthDate(open.child.birthDate?.split("T")[0] || "");
       setColor(open.child.color || "#3b82f6");
       const guardianIds = (open.child.guardians || []).map((guardian) =>
-        typeof guardian === "string" ? guardian : guardian?._id || "",
+        typeof guardian === "string" ? guardian : guardian?._id || ""
       );
       setGuardians(guardianIds.filter((id) => id !== ""));
     }
@@ -126,7 +126,7 @@ export default function EditChildModal({ open, onClose }: EditChildModalProps) {
           color,
           guardians,
         },
-        token || "",
+        token || ""
       );
 
       if (onChildUpdated) {
@@ -183,7 +183,7 @@ export default function EditChildModal({ open, onClose }: EditChildModalProps) {
             sx={{ position: "relative" }}
             htmlFor="color"
           >
-            Favorite Color
+            Theme Color
           </InputLabel>
           <BootstrapInput
             type="color"
@@ -214,7 +214,7 @@ export default function EditChildModal({ open, onClose }: EditChildModalProps) {
                         setGuardians([...guardians, member._id]);
                       } else {
                         setGuardians(
-                          guardians.filter((id) => id !== member._id),
+                          guardians.filter((id) => id !== member._id)
                         );
                       }
                     }}

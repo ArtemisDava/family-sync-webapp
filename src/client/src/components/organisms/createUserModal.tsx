@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import BaseModal from "../atoms/base-modal";
-import { FormControl, InputLabel, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import Button from "@mui/material/Button";
-import { AdminService, type AdminCreateUserDto } from "../../services/admin.service";
+import {
+  AdminService,
+  type AdminCreateUserDto,
+} from "../../services/admin.service";
 import { BootstrapInput } from "./editChildModal";
 import { CustomSelect } from "../atoms/CustomSelect";
 
@@ -63,7 +71,11 @@ export default function CreateUserModal({
       onClose();
     } catch (err) {
       console.error("Error creating user:", err);
-      setError(err instanceof Error ? err.message : "Error creating user. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Error creating user. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +116,11 @@ export default function CreateUserModal({
         </FormControl>
 
         <FormControl variant="standard" required>
-          <InputLabel shrink className="text-xl font-bold" htmlFor="userPassword">
+          <InputLabel
+            shrink
+            className="text-xl font-bold"
+            htmlFor="userPassword"
+          >
             Password
           </InputLabel>
           <BootstrapInput
@@ -119,7 +135,11 @@ export default function CreateUserModal({
         </FormControl>
 
         <FormControl variant="standard" required>
-          <InputLabel shrink className="text-xl font-bold" htmlFor="userBirthDate">
+          <InputLabel
+            shrink
+            className="text-xl font-bold"
+            htmlFor="userBirthDate"
+          >
             Birth Date
           </InputLabel>
           <BootstrapInput
@@ -139,7 +159,7 @@ export default function CreateUserModal({
             sx={{ position: "relative" }}
             htmlFor="userColor"
           >
-            Favorite Color
+            Theme Color
           </InputLabel>
           <BootstrapInput
             type="color"
@@ -157,7 +177,9 @@ export default function CreateUserModal({
           <CustomSelect
             name="role"
             value={role}
-            onChange={(value) => setRole(value as "parent" | "child" | "relative")}
+            onChange={(value) =>
+              setRole(value as "parent" | "child" | "relative")
+            }
             options={[
               { value: "parent", label: "Parent" },
               { value: "child", label: "Child" },
@@ -183,11 +205,7 @@ export default function CreateUserModal({
           </div>
         )}
 
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={isLoading}
-        >
+        <Button type="submit" variant="contained" disabled={isLoading}>
           {isLoading ? "Creating..." : "Create User"}
         </Button>
       </form>

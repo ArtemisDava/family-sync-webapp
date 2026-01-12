@@ -1,5 +1,4 @@
-const API_DOMAIN =
-  import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_DOMAIN = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export interface UserFamilyInfo {
   _id: string;
@@ -38,8 +37,8 @@ export interface AdminUpdateUserDto {
   name?: string;
   birthDate?: string;
   color?: string;
-  phoneNumber?: string;
   role?: "parent" | "child" | "relative";
+  deletedAt: Date | null;
   isAdmin?: boolean;
 }
 
@@ -87,7 +86,9 @@ export const AdminService = {
     }
   },
 
-  async getNewUsersStats(interval: "week" | "month"): Promise<ChartDataPoint[]> {
+  async getNewUsersStats(
+    interval: "week" | "month"
+  ): Promise<ChartDataPoint[]> {
     try {
       const result = await fetch(
         `${API_DOMAIN}/api/admin/stats/new-users/${interval}`,
@@ -174,14 +175,17 @@ export const AdminService = {
 
   async updateUser(userId: string, data: AdminUpdateUserDto) {
     try {
-      const result = await fetch(`${API_DOMAIN}/api/users/admin/${userId}/update`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await fetch(
+        `${API_DOMAIN}/api/users/admin/${userId}/update`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!result.ok) {
         const errorData = await result.json().catch(() => ({}));
@@ -196,13 +200,16 @@ export const AdminService = {
 
   async disableUser(userId: string) {
     try {
-      const result = await fetch(`${API_DOMAIN}/api/users/admin/${userId}/disable`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await fetch(
+        `${API_DOMAIN}/api/users/admin/${userId}/disable`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (!result.ok) {
         throw new Error("Failed to disable user");
@@ -216,13 +223,16 @@ export const AdminService = {
 
   async enableUser(userId: string) {
     try {
-      const result = await fetch(`${API_DOMAIN}/api/users/admin/${userId}/enable`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await fetch(
+        `${API_DOMAIN}/api/users/admin/${userId}/enable`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       if (!result.ok) {
         throw new Error("Failed to enable user");

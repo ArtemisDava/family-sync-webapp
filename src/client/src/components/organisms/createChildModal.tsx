@@ -10,7 +10,11 @@ import { BootstrapInput } from "./editChildModal";
 
 interface CreateChildModalProps {
   open: {
-    families: { name: string; _id: string; members: {_id: string, name: string }[] }[];
+    families: {
+      name: string;
+      _id: string;
+      members: { _id: string; name: string }[];
+    }[];
     onChildCreated?: () => void;
   } | null;
   onClose: () => void;
@@ -123,7 +127,7 @@ export default function CreateChildModal({
             sx={{ position: "relative" }}
             htmlFor="color"
           >
-            Favorite Color
+            Theme Color
           </InputLabel>
           <BootstrapInput
             type="color"
@@ -154,7 +158,7 @@ export default function CreateChildModal({
                         setGuardians([...guardians, member._id]);
                       } else {
                         setGuardians(
-                          guardians.filter((id) => id !== member._id),
+                          guardians.filter((id) => id !== member._id)
                         );
                       }
                     }}
