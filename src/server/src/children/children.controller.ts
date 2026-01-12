@@ -47,18 +47,6 @@ export class ChildrenController {
     return this.childrenService.remove(id);
   }
 
-  // NICE TO HAVE
-
-  // @Get(':id/age')
-  // getAge(@Param('id') id: string) {
-  //   return this.childrenService.getAge(id);
-  // }
-
-  // @Get('family/:familyId')
-  // findByFamily(@Param('familyId') familyId: string) {
-  //   return this.childrenService.findByFamily(familyId);
-  // }
-
   @Get('user/:userId')
   @Roles()
   findByUser(

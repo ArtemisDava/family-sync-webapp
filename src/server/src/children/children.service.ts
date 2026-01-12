@@ -109,33 +109,4 @@ export class ChildrenService {
       .populate('guardians', '-password')
       .exec();
   }
-
-  //  nice to have Beräkna ålder
-  // async getAge(id: string): Promise<number> {
-  //   const child = await this.findOne(id);
-  //   const today = new Date();
-  //   const birthDate = new Date(child.birthDate);
-  //   let age = today.getFullYear() - birthDate.getFullYear();
-  //   const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  //   if (
-  //     monthDiff < 0 ||
-  //     (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  //   ) {
-  //     age--;
-  //   }
-
-  //   return age;
-  // }
-
-  // async findByFamily(familyId: string): Promise<Child[]> {
-  //   if (!Types.ObjectId.isValid(familyId)) {
-  //     throw new BadRequestException('Invalid family ID');
-  //   }
-
-  //   return this.childModel
-  //     .find({ family: familyId })
-  //     .populate('guardians', '-password')
-  //     .exec();
-  // }
 }
