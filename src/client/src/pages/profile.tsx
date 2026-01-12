@@ -20,7 +20,7 @@ import { useModal } from "../contexts/modal.context";
 import { formatDate } from "../utils/date.utils";
 
 const WEB_DOMAIN =
-  import.meta.env.WEB_DOMAIN || "https://familysyncwebb.netlify.app/";
+  import.meta.env.WEB_DOMAIN || "https://familysyncwebb.netlify.app";
 
 export default function ProfilePage() {
   const { user, token, setUser } = useUser();
