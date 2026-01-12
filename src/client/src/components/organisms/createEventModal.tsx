@@ -48,9 +48,14 @@ export default function CreateEventModal({
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [visibility, setVisibility] = useState("shared");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (!open) return;
+    if (assignedId !== user?.userId) {
+      setVisibility("shared");
+    }
 
     if (open.start instanceof Date) {
       setStartDate(toDatetimeLocal(open.start));
@@ -76,41 +81,45 @@ export default function CreateEventModal({
             const isAnAdultEvent = user && assignedId === user.userId;
 
             const information: {
-              childId: string | undefined;
-              adultId: string | undefined;
               eventData: {
+                child: string | undefined;
+                adult: string | undefined;
+                visibility: string;
                 title: string;
                 startDate: string;
                 endDate: string;
                 category: string;
                 location: string;
                 family: string;
+                notes: string[];
               };
               token: string;
             } = {
-              adultId: isAnAdultEvent ? user.userId : undefined,
-              childId: isAnAdultEvent ? undefined : assignedId,
               eventData: {
+                adult: isAnAdultEvent ? user.userId : undefined,
+                child: isAnAdultEvent ? undefined : assignedId,
                 title: formData.get("title")?.toString() || "",
+                visibility: formData.get("visibility")?.toString() || "shared",
                 startDate: startDate ? new Date(startDate).toISOString() : "",
                 endDate: endDate ? new Date(endDate).toISOString() : "",
                 category: formData.get("category")?.toString() || "",
                 location: formData.get("location")?.toString() || "",
                 family: familyId,
+                notes: [formData.get("notes")?.toString() || ""],
               },
               token: token || "",
             };
 
-            if (!information.childId && !information.adultId) {
+            if (!information.eventData.child && !information.eventData.adult) {
               throw new Error("No valid target selected for the event.");
             }
-            if (!isAnAdultEvent && information.childId) {
+            if (!isAnAdultEvent && information.eventData.child) {
               await EventsService.addNewEventToChild(
-                information.childId,
+                information.eventData.child,
                 information.eventData,
                 information.token,
               );
-            } else if (isAnAdultEvent && information.adultId) {
+            } else if (isAnAdultEvent && information.eventData.adult) {
               await EventsService.addNewEventToAdult(
                 familyId,
                 information.eventData,
@@ -179,13 +188,29 @@ export default function CreateEventModal({
               user
                 ? {
                   value: user.userId,
-                  label: "Myself",
+                  label: user.name,
                   color: user.color,
                 }
                 : null,
             ].filter((o): o is Option => o !== null)}
           />
         </div>
+        {assignedId === user?.userId && (
+          <div>
+            Visibility: *
+            <CustomSelect
+              name="visibility"
+              value={visibility}
+              onChange={setVisibility}
+              required
+              placeholder="Select visibility"
+              options={[
+                { value: "private", label: "Private" },
+                { value: "shared", label: "Shared" },
+              ]}
+            />
+          </div>
+        )}
         <div>
           Category: *
           <CategorySelect
@@ -234,6 +259,19 @@ export default function CreateEventModal({
             id="endDate"
             required
             onChange={(e) => setEndDate(e.target.value)}
+          />
+        </FormControl>
+
+                <FormControl variant="standard">
+          <InputLabel shrink className="text-xl font-bold" htmlFor="notes">
+            Notes
+          </InputLabel>
+          <BootstrapInput
+            type="text"
+            value={notes}
+            name="notes"
+            id="notes"
+            onChange={(e) => setNotes(e.target.value)}
           />
         </FormControl>
 
