@@ -49,21 +49,24 @@ export function useScheduleData(): UseScheduleDataReturn {
         childId: child._id,
         events: await EventsService.getEventsByChild(child._id, token),
       }));
-      const eventPromisesAdult = fetchedFamilies.map(
-        async (family: Family) => ({
-          childId: user.userId,
-          events: await EventsService.getEventsByAdult(family._id, token),
-        }),
-      );
 
-      const eventResults = await Promise.all([
-        ...eventPromises,
-        ...eventPromisesAdult,
-      ]);
+      const eventResults = await Promise.all(eventPromises);
 
       const eventsByChildId: EventsByChild = {};
       for (const { childId, events } of eventResults) {
         eventsByChildId[childId] = events;
+      }
+
+      const adultEventsPromises = fetchedFamilies.map(async (family: Family) => {
+        const adultEvents = await EventsService.getEventsByAdult(family._id, token);
+        return adultEvents;
+      });
+
+      const allAdultEventsArrays = await Promise.all(adultEventsPromises);
+      const allAdultEvents = allAdultEventsArrays.flat();
+      
+      if (user?.userId && allAdultEvents.length > 0) {
+        eventsByChildId[user.userId] = allAdultEvents;
       }
 
       setEventsByChild(eventsByChildId);
