@@ -54,6 +54,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [userToDisable, setUserToDisable] = useState<UserForModal | null>(null);
+  const [userToDelete, setUserToDelete] = useState<UserForModal | null>(null);
   const [userToEdit, setUserToEdit] = useState<UserForModal | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -110,10 +111,8 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <section className="mx-auto w-full min-h-screen pb-20 max-w-6xl">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">
-          Admin Dashboard
-        </h1>
+      <section className="mx-auto w-full min-h-screen pb-20 max-w-6xl p-4 lg:p-0">
+        <h1 className="text-lg md:text-2xl font-bold mb-8">Admin Dashboard</h1>
 
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Widget type="user" amount={overviewStats.totalUsers} />

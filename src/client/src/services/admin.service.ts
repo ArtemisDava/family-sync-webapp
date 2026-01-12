@@ -243,4 +243,25 @@ export const AdminService = {
       throw error;
     }
   },
+
+  async deleteUser(userId: string) {
+    try {
+      const result = await fetch(
+        `${API_DOMAIN}/api/users/admin/${userId}/delete`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (!result.ok) {
+        throw new Error("Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
+  },
 };
