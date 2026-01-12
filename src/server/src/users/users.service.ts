@@ -194,4 +194,11 @@ export class UsersService {
     }
     return user;
   }
+
+  async adminDeleteUser(id: string): Promise<void> {
+    const result = await this.userModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException('User not found');
+    }
+  }
 }

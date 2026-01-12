@@ -117,4 +117,13 @@ export class UsersController {
     }
     return this.usersService.enableUser(id);
   }
+
+  @Delete('admin/:id/delete')
+  @Roles('admin')
+  adminDeleteUser(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    if (!req.user) {
+      throw new ForbiddenException('Access denied. Authentication required.');
+    }
+    return this.usersService.adminDeleteUser(id);
+  }
 }
