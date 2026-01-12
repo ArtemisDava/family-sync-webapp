@@ -13,6 +13,7 @@ import { FamiliesService } from "../services/families.service";
 import { Input } from "@mui/material";
 import { UserService } from "../services/user.service";
 import { ChildrenService } from "../services/children.service";
+import { InvitationService } from "../services/invitation.service";
 import { type Family } from "../models/event";
 import Card from "../components/atoms/card";
 import { useModal } from "../contexts/modal.context";
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const [toggleNewFamily, setToggleNewFamily] = React.useState(false);
   const [families, setFamilies] = React.useState<Family[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [name, setName] = React.useState(user?.name || "");
   const [email, setEmail] = React.useState(user?.email || "");
   const [password, setPassword] = React.useState("");
   const [color, setColor] = React.useState(user?.color || "#000000");
@@ -40,12 +42,22 @@ export default function ProfilePage() {
     }[]
   >([]);
   const [currentView, setCurrentView] = React.useState<
-    "settings" | "family" | "children"
+    "settings" | "family" | "children" | "invitations"
   >("family");
   const [isSaving, setIsSaving] = React.useState(false);
   const [copiedFamilyId, setCopiedFamilyId] = useState<string | null>(null);
   const [editingFamilyId, setEditingFamilyId] = useState<string | null>(null);
   const [editingFamilyName, setEditingFamilyName] = useState("");
+  const [invitations, setInvitations] = useState<
+    {
+      _id: string;
+      familyId: { _id: string; name: string };
+      invitedByUser: { _id: string; name: string };
+      status: "pending" | "accepted" | "rejected" | "expired";
+      createdAt: string;
+      respondedAt?: string;
+    }[]
+  >([]);
 
   const loadFamilies = useCallback(async () => {
     if (token) {
@@ -64,6 +76,16 @@ export default function ProfilePage() {
     }
   }, [token, user?.userId]);
 
+  const loadInvitations = useCallback(async () => {
+    if (!token) return;
+    try {
+      const invitationsData = await InvitationService.getInvitations(token);
+      setInvitations(invitationsData);
+    } catch (error) {
+      console.error("Error loading invitations:", error);
+    }
+  }, [token]);
+
   useEffect(() => {
     if (!user) {
       window.location.href = "/";
@@ -71,6 +93,12 @@ export default function ProfilePage() {
     }
     loadFamilies();
   }, [user, loadFamilies]);
+
+  useEffect(() => {
+    if (currentView === "invitations") {
+      loadInvitations();
+    }
+  }, [currentView, loadInvitations]);
 
   const handleCreateFamily = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +113,7 @@ export default function ProfilePage() {
   };
 
   const handleCopyInviteLink = (familyId: string) => {
-    const inviteLink = `${WEB_DOMAIN}/invite/${familyId}`;
+    const inviteLink = `${WEB_DOMAIN}/invite/${familyId}/${user?.userId}`;
     navigator.clipboard.writeText(inviteLink);
     setCopiedFamilyId(familyId);
     setTimeout(() => setCopiedFamilyId(null), 2000);
@@ -128,8 +156,12 @@ export default function ProfilePage() {
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
-      const updateData: { email?: string; password?: string; color?: string } =
+      const updateData: { name?: string; email?: string; password?: string; color?: string } =
         {};
+
+      if (name && name !== user?.name) {
+        updateData.name = name;
+      }
 
       if (email && email !== user?.email) {
         updateData.email = email;
@@ -195,6 +227,15 @@ export default function ProfilePage() {
               My Children
             </Button>
 
+            <Button
+              variant={currentView === "invitations" ? "contained" : "text"}
+              onClick={() => setCurrentView("invitations")}
+              fullWidth
+              size="small"
+            >
+              Invitations
+            </Button>
+
             <Button variant="contained" fullWidth size="small" color="error">
               Logout
             </Button>
@@ -212,7 +253,8 @@ export default function ProfilePage() {
                   Name:
                 </label>
                 <Input
-                  value={user?.name || ""}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   sx={{
                     backgroundColor: "#0B6CEB1A",
                     borderRadius: "8px",
@@ -462,11 +504,10 @@ export default function ProfilePage() {
                       arrow
                     >
                       <button
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          copiedFamilyId === family._id
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${copiedFamilyId === family._id
                             ? "bg-green-100 text-green-700 border border-green-300"
                             : "text-[#0B6CEB] font-bold "
-                        }`}
+                          }`}
                         onClick={() => handleCopyInviteLink(family._id)}
                       >
                         {copiedFamilyId === family._id
@@ -768,6 +809,109 @@ export default function ProfilePage() {
           </div>
         )}
         {/* END CHILDREN VIEW */}
+
+        {/* BEGIN INVITATIONS VIEW */}
+
+        {currentView === "invitations" && (
+          <div className="">
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 text-base sm:text-xl justify-between border-b bg-white shadow-sm p-4 rounded-t-md">
+              <div className="flex gap-3 sm:gap-5">
+                <p className="text-lg md:text-2xl font-bold">My Invitations</p>
+              </div>
+            </div>
+            {invitations.length === 0 ? (
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <p className="text-gray-600">No invitations at the moment.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {invitations.map((invitation) => (
+                  <Card
+                    key={invitation._id}
+                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 bg-white"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-lg font-bold">
+                        {invitation.familyId?.name || "Unknown Family"}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Invited by:{" "}
+                        <span className="font-semibold">
+                          {invitation.invitedByUser?.name || "Unknown User"}
+                        </span>
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(invitation.createdAt).toLocaleDateString()}
+                      </p>
+                      <span
+                        className={`text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit ${
+                          invitation.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : invitation.status === "accepted"
+                            ? "bg-green-100 text-green-800"
+                            : invitation.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {invitation.status.toUpperCase()}
+                      </span>
+                    </div>
+                    {invitation.status === "pending" && (
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="small"
+                          onClick={async () => {
+                            try {
+                              await InvitationService.acceptInvitation(
+                                invitation._id,
+                                token || ""
+                              );
+                              loadInvitations();
+                              loadFamilies();
+                            } catch (error) {
+                              console.error("Error accepting invitation:", error);
+                              alert("Failed to accept invitation. Please try again.");
+                            }
+                          }}
+                          sx={{ fontWeight: "bold", fontSize: "12px" }}
+                        >
+                          <IonIcon icon={checkmarkOutline} className="mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={async () => {
+                            try {
+                              await InvitationService.rejectInvitation(
+                                invitation._id,
+                                token || ""
+                              );
+                              loadInvitations();
+                            } catch (error) {
+                              console.error("Error rejecting invitation:", error);
+                              alert("Failed to reject invitation. Please try again.");
+                            }
+                          }}
+                          sx={{ fontWeight: "bold", fontSize: "12px" }}
+                        >
+                          <IonIcon icon={closeOutline} className="mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* END INVITATIONS VIEW */}
       </div>
     </section>
   );
