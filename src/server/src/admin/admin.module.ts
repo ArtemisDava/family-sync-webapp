@@ -21,6 +21,7 @@ import {
   FamilyInvitationSchema,
 } from '../family-invitation/entities/family-invitation.entity';
 import { Event, EventSchema } from '../events/entities/event.entity';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { Event, EventSchema } from '../events/entities/event.entity';
       { name: FamilyInvitation.name, schema: FamilyInvitationSchema },
       { name: Event.name, schema: EventSchema },
     ]),
+    MailModule,
   ],
   controllers: [AdminController],
   providers: [

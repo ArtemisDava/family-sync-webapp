@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppService } from './app.service';
@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { ConnectionLogsModule } from './connection_logs/connection_logs.module';
 import { FamilyInvitationModule } from './family-invitation/family-invitation.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { FamilyInvitationModule } from './family-invitation/family-invitation.mo
     AdminModule,
     ConnectionLogsModule,
     FamilyInvitationModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

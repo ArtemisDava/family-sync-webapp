@@ -18,6 +18,7 @@ import { FamiliesService } from '../families/families.service';
 import { Family, FamilySchema } from '../families/entities/family.entity';
 import { Child, ChildSchema } from '../children/entities/child.entity';
 import { Event, EventSchema } from '../events/entities/event.entity';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Event, EventSchema } from '../events/entities/event.entity';
       { name: Child.name, schema: ChildSchema },
       { name: Event.name, schema: EventSchema },
     ]),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [

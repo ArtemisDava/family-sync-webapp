@@ -12,12 +12,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AdminCreateUserDto } from './dto/admin-create-user.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { FamilyInvitationService } from 'src/family-invitation/family-invitation.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly familyInvitationService: FamilyInvitationService,
+    private readonly mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -175,6 +177,10 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    if (user.email && user.name) {
+      await this.mailService.sendUserDisabledEmail(user.email, user.name);
+    }
     return user;
   }
 
@@ -187,6 +193,8 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    await this.mailService.sendUserEnabledEmail(user.email, user.name);
     return user;
   }
 
@@ -195,5 +203,7 @@ export class UsersService {
     if (!result) {
       throw new NotFoundException('User not found');
     }
+
+    await this.mailService.sendUserDeletedEmail(result.email, result.name);
   }
 }
