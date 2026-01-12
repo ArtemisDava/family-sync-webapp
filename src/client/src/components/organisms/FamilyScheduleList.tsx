@@ -1,19 +1,17 @@
 import React from "react";
-import type { Family, Children } from "../../models/event";
+import type { Family, Children, Member } from "../../models/event";
 import type LoginInformation from "../../models/loginInformation";
 
 interface FamilyScheduleListProps {
   families: Family[];
   disabledChildren: Set<string>;
   onToggleChild: (childId: string, familyId?: string) => void;
-  user: LoginInformation | null;
 }
 
 export function FamilyScheduleList({
   families,
   disabledChildren,
   onToggleChild,
-  user,
 }: FamilyScheduleListProps) {
   return (
     <div>
@@ -24,7 +22,6 @@ export function FamilyScheduleList({
           family={family}
           disabledChildren={disabledChildren}
           onToggleChild={onToggleChild}
-          user={user}
         />
       ))}
     </div>
@@ -35,14 +32,12 @@ interface FamilyCardProps {
   family: Family;
   disabledChildren: Set<string>;
   onToggleChild: (childId: string, familyId?: string) => void;
-  user: LoginInformation | null;
 }
 
 function FamilyCard({
   family,
   disabledChildren,
   onToggleChild,
-  user,
 }: FamilyCardProps) {
   return (
     <div className="mb-4 p-2 border bg-white border-gray-300 rounded">
@@ -56,21 +51,21 @@ function FamilyCard({
             onToggle={() => onToggleChild(child._id, family._id)}
           />
         ))}
-        {user && (
+        {family.members.map((member: Member) => (
           <ChildToggleItem
-            key={user.userId}
-            child={user}
-            isEnabled={!disabledChildren.has(user.userId + "-" + family._id)}
-            onToggle={() => onToggleChild(user.userId, family._id)}
+            key={member._id}
+            child={member}
+            isEnabled={!disabledChildren.has(member._id + "-" + family._id)}
+            onToggle={() => onToggleChild(member._id, family._id)}
           />
-        )}
+        ))}
       </ul>
     </div>
   );
 }
 
 interface ChildToggleItemProps {
-  child: Children | LoginInformation;
+  child: Children | Member;
   isEnabled: boolean;
   onToggle: () => void;
 }
