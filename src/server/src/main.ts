@@ -9,7 +9,7 @@ async function bootstrap() {
   app.set('trust proxy', 'loopback');
   // Enable CORS for client
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://familysyncwebb.netlify.app'],
+    origin: ['https://familysyncwebb.netlify.app'],
     credentials: false,
   });
 
